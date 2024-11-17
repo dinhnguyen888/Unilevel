@@ -5,13 +5,15 @@ using System.Threading.Tasks;
 public class EmailService
 {
     private readonly ISendGridClient _sendGridClient;
-    private readonly string _fromEmail = "nguyenphucdinh89@gmail.com";
+    private readonly string _fromEmail = "nguyenphucdinh88@gmail.com";
 
     public EmailService(ISendGridClient sendGridClient)
     {
         _sendGridClient = sendGridClient;
     }
 
+
+    //gui mail
     public async Task SendEmailAsync(string toEmail, string subject, string body)
     {
         var from = new EmailAddress(_fromEmail, "Unilevel");

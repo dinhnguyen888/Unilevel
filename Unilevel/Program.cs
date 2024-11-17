@@ -2,8 +2,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SendGrid;
-
+using Swashbuckle.AspNetCore.Filters;
+using System.Security.Claims;
+using System.Text;
+using Unilevel.Controllers;
+using Unilevel.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,23 +17,73 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 var sendGridApiKey = builder.Configuration["SendGrid:ApiKey"];
 builder.Services.AddSingleton<ISendGridClient>(new SendGridClient(sendGridApiKey));
+
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<PersonalInfoService>();
+builder.Services.AddScoped<SystemUserService>();
+// JWT Configuration
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+string secretKey = jwtSettings["Key"];
+string issuer = jwtSettings["Issuer"];
+string audience = jwtSettings["Audience"];
+int expiresInMinutes = int.Parse(jwtSettings["ExpiresInMinutes"]);
 
-
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        RoleClaimType = ClaimTypes.Role,
+    };
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header. Example: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
 
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
 
-   
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -49,9 +104,9 @@ using (var scope = app.Services.CreateScope())
     {
         Console.WriteLine("Database connection failed.");
     }
-
 }
-    app.UseHttpsRedirection();
+
+app.UseHttpsRedirection();
 
 // Add Authentication and Authorization Middleware
 app.UseAuthentication();
@@ -60,55 +115,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-        
-
-// Configure Identity
-//builder.Services.AddIdentity<Account, IdentityRole<int>>(options =>
-//{
-//    options.Password.RequireDigit = true;
-//    options.Password.RequireLowercase = true;
-//    options.Password.RequireUppercase = true;
-//    options.Password.RequireNonAlphanumeric = false;
-//    options.Password.RequiredLength = 6;
-//})
-//.AddEntityFrameworkStores<UniLevelDbContext>()
-//.AddDefaultTokenProviders();
-
-// Configure JWT Authentication
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//}).AddJwtBearer(options =>
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidateLifetime = true,
-//        ValidateIssuerSigningKey = true,
-//        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//        ValidAudience = builder.Configuration["Jwt:Issuer"],
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-//    };
-//});
-
-// Register AuthService for dependency injection
-//builder.Services.AddScoped<AuthService>();
-
-
-
-// Ensure database connection at startup
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dbContext = scope.ServiceProvider.GetRequiredService<UniLevelDbContext>();
-//    if (dbContext.Database.CanConnect())
-//    {
-//        Console.WriteLine("Database connection OK.");
-//    }
-//    else
-//    {
-//        Console.WriteLine("Database connection failed.");
-//    }
-//}

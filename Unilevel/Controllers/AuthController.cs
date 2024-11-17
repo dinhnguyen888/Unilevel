@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 [Route("api/[controller]")]
@@ -11,33 +12,23 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-    //dang nhap 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(string username, string password, string email)
-    {
-        var result = await _authService.RegisterAsync(username, password, email);
 
-        if (result.Succeeded)
-        {
-            return Ok(new { message = "Đăng ký thành công" });
-        }
 
-        return BadRequest(new { message = "Có lỗi xảy ra:", errors = result.Errors });
-    }
-
-    //dang ky
+    //dang nhap
     [HttpPost("login")]
     public async Task<IActionResult> Login(string username, string password)
     {
-        var result = await _authService.LoginAsync(username, password);
+        var (success, token) = await _authService.LoginAsync(username, password);
 
-        if (result.Succeeded)
+        if (success)
         {
-            return Ok(new { message = "login ok" });
+            return Ok(new { message = "Login successful", token = token });
         }
 
         return Unauthorized(new { message = "Invalid login attempt" });
     }
+
+
     //dang xuat
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
@@ -45,7 +36,11 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync();
         return Ok(new { message = "Logout ok" });
     }
+
+
     //gui yeu cau khoi phuc mat khau
+    //flow: quen mat khau -> nhap tai khoan gmail -> nhan token qua gmail (do khong cho phep lam UI )
+    //-> nhap token vao reset mat khau 
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] string email)
     {
@@ -60,13 +55,13 @@ public class AuthController : ControllerBase
         }
     }
 
-    
 
-    // Đặt lại mật khẩu
+
+    // Reset password
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(string email, string token, string newPassword)
+    public async Task<IActionResult> ResetPassword(string email, string token)
     {
-        var isReset = await _authService.ResetPasswordAsync(email, token, newPassword);
+        var isReset = await _authService.ResetPasswordAsync(email, token);
         return isReset ? Ok(new { message = "Password reset successful." }) : BadRequest(new { message = "Reset failed." });
     }
 

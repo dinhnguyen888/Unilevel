@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Unilevel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241114035951_UpdateUser")]
+    partial class UpdateUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,92 +48,6 @@ namespace Unilevel.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "7d4d12ab-57f9-4e56-aafe-5b0ff92a0574",
-                            ConcurrencyStamp = "109c1c59-6896-4a3b-b9e4-544d355e7a05",
-                            Name = "Owner",
-                            NormalizedName = "OWNER"
-                        },
-                        new
-                        {
-                            Id = "dd40f342-d5e1-4387-a76c-869db1f28902",
-                            ConcurrencyStamp = "99d33515-ced8-42c5-be73-6fce6debf9ee",
-                            Name = "Administrator",
-                            NormalizedName = "ADMINISTRATOR"
-                        },
-                        new
-                        {
-                            Id = "6c582a58-79d1-4d1c-b907-b8157385386a",
-                            ConcurrencyStamp = "4d83baf9-cab3-472f-b835-84fc7bea0803",
-                            Name = "VPCD",
-                            NormalizedName = "VPCD"
-                        },
-                        new
-                        {
-                            Id = "4ff392cd-dfe5-4e68-87ef-48fd54d151f2",
-                            ConcurrencyStamp = "7fb46488-7aea-4d43-9d59-25210d74b7c2",
-                            Name = "BM",
-                            NormalizedName = "BM"
-                        },
-                        new
-                        {
-                            Id = "76d860a2-a3d4-45c5-87c0-12d9abe15e1f",
-                            ConcurrencyStamp = "931e74f7-aac9-4407-b529-22a31e305041",
-                            Name = "ChannelActivationHead",
-                            NormalizedName = "CHANNEL ACTIVATION HEAD"
-                        },
-                        new
-                        {
-                            Id = "e51a3612-ec29-48ab-ad47-e289b500371f",
-                            ConcurrencyStamp = "08f35967-d0ff-4e06-b34f-135555c03500",
-                            Name = "ASM",
-                            NormalizedName = "ASM"
-                        },
-                        new
-                        {
-                            Id = "8b7f28e4-6725-494f-a236-fc3248ca9e39",
-                            ConcurrencyStamp = "56dedab8-2c46-406c-95d4-7bbbcd4e3256",
-                            Name = "BAM",
-                            NormalizedName = "BAM"
-                        },
-                        new
-                        {
-                            Id = "9605e649-0a90-46a0-8904-33e11d82a920",
-                            ConcurrencyStamp = "a7a2aa43-95ff-4ccd-b5e0-6f6ecaf6c70e",
-                            Name = "CE",
-                            NormalizedName = "CE – CAPABILITY EXECUTIVE"
-                        },
-                        new
-                        {
-                            Id = "f730b78b-9b47-49c6-8c67-8aa546a76bd1",
-                            ConcurrencyStamp = "82a4c3c0-9c2b-4e2d-b67e-934fcb09d861",
-                            Name = "SaleSUP",
-                            NormalizedName = "SALE SUP – SALE SUPERVISOR"
-                        },
-                        new
-                        {
-                            Id = "177747c0-2e00-4728-9b31-b5da3c21fb0e",
-                            ConcurrencyStamp = "59ab822d-9c7d-4180-8bb1-fbc76c7b935a",
-                            Name = "Distributor-OM/TL",
-                            NormalizedName = "DISTRIBUTOR - OM/TL"
-                        },
-                        new
-                        {
-                            Id = "cf96ddfa-5acc-46e5-b31d-3b81f66b6905",
-                            ConcurrencyStamp = "5707726d-e3ec-46a9-8106-1875e649a4bd",
-                            Name = "OtherDepartment",
-                            NormalizedName = "OTHER DEPARTMENT"
-                        },
-                        new
-                        {
-                            Id = "f8a47ea4-95f6-4316-b27c-c0ff5a92d04e",
-                            ConcurrencyStamp = "2130a788-4da7-4774-b4ca-e77881042592",
-                            Name = "Guest",
-                            NormalizedName = "GUEST"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -249,9 +165,11 @@ namespace Unilevel.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Area")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -265,10 +183,7 @@ namespace Unilevel.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("JoinDate")
+                    b.Property<DateTime>("JoinDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("LockoutEnabled")
@@ -289,6 +204,7 @@ namespace Unilevel.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PathPicture")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -296,9 +212,6 @@ namespace Unilevel.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Reporter")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

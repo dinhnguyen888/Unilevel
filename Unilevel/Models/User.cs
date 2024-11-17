@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Unilevel.Models
+public class User : IdentityUser
 {
-    public class User : IdentityUser
-    {
-        public string? Initails { get; set; }
-    }
+    public string? PathPicture { get; set; } 
+    public string? Address { get; set; }
+    public string? Area { get; set; }
+    public DateTime? JoinDate { get; set; }
+    public bool? IsActive { get; set; }
+    public string? Reporter { get; set; }
+
 }
-
-
-
