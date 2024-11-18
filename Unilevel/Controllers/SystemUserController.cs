@@ -106,5 +106,64 @@ namespace Unilevel.Controllers
             }
             return BadRequest(result.Errors);
         }
+
+
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportUsers(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Invalid file.");
+            }
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".csv" && extension != ".xlsx")
+            {
+                return BadRequest("Only CSV or Excel files are supported.");
+            }
+
+            try
+            {
+                Stream processedStream;
+
+                // Call the service to handle CSV to Excel conversion
+                if (extension == ".csv")
+                {
+                    processedStream = _systemUserService.ConvertCsvToExcel(file.OpenReadStream());
+                }
+                else
+                {
+                    processedStream = file.OpenReadStream();
+                }
+
+                // Process the Excel file
+                var (added, updated, errors, errorLogs) = await _systemUserService.ImportUsersFromExcelAsync(processedStream);
+
+                return Ok(new
+                {
+                    AddedUsers = added,
+                    UpdatedUsers = updated,
+                    ErrorCount = errors,
+                    ErrorLogs = errorLogs // Return the errors directly in the response
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
+
+
+        [HttpGet("export")]
+        public async Task<IActionResult> ExportUsers()
+        {
+            var fileContent = await _systemUserService.ExportUsersToExcelAsync();
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Users.xlsx");
+        }
+
     }
+
+
 }

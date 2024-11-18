@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Unilevel.DTOs;
@@ -197,6 +198,182 @@ namespace Unilevel.Services
             var reporterUser = await _userManager.FindByNameAsync(reporterUserName);
             return reporterUser != null;
         }
+
+        public async Task<(int added, int updated, int errors, List<string> errorLogs)> ImportUsersFromExcelAsync(Stream fileStream)
+        {
+            int added = 0, updated = 0, errors = 0;
+            var errorLogs = new List<string>();
+
+            using (var workbook = new XLWorkbook(fileStream))
+            {
+                var worksheet = workbook.Worksheet(1); // Assuming data is in the first sheet
+                var rows = worksheet.RowsUsed();
+
+                foreach (var row in rows.Skip(1)) // Bỏ qua hàng tiêu đề
+                {
+                    try
+                    {
+                        string userName = row.Cell(1).GetValue<string>();
+                        string email = row.Cell(2).GetValue<string>();
+                        string phoneNumber = row.Cell(3).GetValue<string>();
+                        string address = row.Cell(4).GetValue<string>();
+                        string area = row.Cell(5).GetValue<string>();
+                        string role = row.Cell(7).GetValue<string>();
+
+                        if (!DateTime.TryParse(row.Cell(6).GetValue<string>(), out var joinDate))
+                            throw new Exception("Invalid date format in JoinDate");
+
+                        if (!bool.TryParse(row.Cell(8).GetValue<string>(), out var isActive))
+                            throw new Exception("Invalid boolean format in IsActive");
+
+                        // Kiểm tra role trước
+                        if (!string.IsNullOrEmpty(role))
+                        {
+                            var roleExists = await _roleManager.RoleExistsAsync(role); // Kiểm tra role có tồn tại không
+                            if (!roleExists)
+                                throw new Exception($"Role {role} does not exist.");
+                        }
+
+                        // Tìm người dùng
+                        var existingUser = await _userManager.FindByNameAsync(userName);
+
+                        if (existingUser == null)
+                        {
+                            // Tạo người dùng mới
+                            var newUser = new User
+                            {
+                                UserName = userName,
+                                Email = email,
+                                PhoneNumber = phoneNumber,
+                                Address = address,
+                                Area = area,
+                                JoinDate = joinDate,
+                                IsActive = isActive
+                            };
+
+                            var result = await _userManager.CreateAsync(newUser, "Abc123@"); // Mật khẩu mặc định
+
+                            if (!result.Succeeded)
+                                throw new Exception($"Failed to create user '{userName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+                            // Gán role nếu có
+                            if (!string.IsNullOrEmpty(role))
+                            {
+                                var roleResult = await _userManager.AddToRoleAsync(newUser, role);
+                                if (!roleResult.Succeeded)
+                                    throw new Exception($"Failed to assign role {role} to user {userName}");
+                            }
+
+                            added++;
+                        }
+                        else
+                        {
+                            // Cập nhật người dùng hiện có
+                            existingUser.Email = email;
+                            existingUser.PhoneNumber = phoneNumber;
+                            existingUser.Address = address;
+                            existingUser.Area = area;
+                            existingUser.JoinDate = joinDate;
+                            existingUser.IsActive = isActive;
+
+                            var updateResult = await _userManager.UpdateAsync(existingUser);
+                            if (!updateResult.Succeeded)
+                                throw new Exception($"Failed to update user '{userName}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+
+                            updated++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Đảm bảo bỏ qua hoàn toàn hàng hiện tại nếu có lỗi
+                        errors++;
+                        errorLogs.Add($"Error processing row {row.RowNumber()}: {ex.Message}");
+                    }
+                }
+            }
+
+            return (added, updated, errors, errorLogs);
+        }
+
+        public Stream ConvertCsvToExcel(Stream csvStream)
+        {
+            using (var reader = new StreamReader(csvStream))
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add("Sheet1");
+
+                    int currentRow = 1;
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine();
+                        var values = line?.Split(',');
+
+                        if (values == null) continue;
+
+                        for (int i = 0; i < values.Length; i++)
+                        {
+                            worksheet.Cell(currentRow, i + 1).Value = values[i];
+                        }
+
+                        currentRow++;
+                    }
+
+                    var excelStream = new MemoryStream();
+                    workbook.SaveAs(excelStream);
+                    excelStream.Position = 0; // Reset stream position
+                    return excelStream;
+                }
+            }
+        }
+
+
+
+
+
+        public async Task<byte[]> ExportUsersToExcelAsync()
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Users");
+
+                // Add headers
+                worksheet.Cell(1, 1).Value = "UserName";
+                worksheet.Cell(1, 2).Value = "Email";
+                worksheet.Cell(1, 3).Value = "PhoneNumber";
+                worksheet.Cell(1, 4).Value = "Address";
+                worksheet.Cell(1, 5).Value = "Area";
+                worksheet.Cell(1, 6).Value = "JoinDate";
+                worksheet.Cell(1, 7).Value = "Role";
+                worksheet.Cell(1, 8).Value = "IsActive";
+
+                // Add user data
+                var users = await _userManager.Users.ToListAsync();
+                int row = 2;
+
+                foreach (var user in users)
+                {
+                    bool? isActive = user.IsActive;
+                    var roles = await _userManager.GetRolesAsync(user);
+                    worksheet.Cell(row, 1).Value = user.UserName;
+                    worksheet.Cell(row, 2).Value = user.Email;
+                    worksheet.Cell(row, 3).Value = user.PhoneNumber;
+                    worksheet.Cell(row, 4).Value = user.Address;
+                    worksheet.Cell(row, 5).Value = user.Area;
+                    worksheet.Cell(row, 6).Value = user.JoinDate;
+                    worksheet.Cell(row, 7).Value = roles.FirstOrDefault();
+                    worksheet.Cell(row, 8).Value = isActive ?? false;
+                    row++;
+                }
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    return stream.ToArray();
+                }
+            }
+        }
     }
+
 
 }
