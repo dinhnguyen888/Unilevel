@@ -7,7 +7,7 @@
         public string? Email { get; set; }
         public string? Role { get; set; }
         public string? Address { get; set; }
-        public string? Area { get; set; }
+        public string? AreaId { get; set; }
         public DateTime? JoinDate { get; set; }
         public string? PathPicture { get; set; }
 

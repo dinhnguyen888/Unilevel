@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Unilevel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241125025850_AddImplementationDatesNavigation")]
+    partial class AddImplementationDatesNavigation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,30 +165,18 @@ namespace Unilevel.Migrations
                     b.ToTable("Area");
                 });
 
-            modelBuilder.Entity("Unilevel.Models.CommentForJob", b =>
+            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("JobId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserComment")
+                    b.Property<string>("SaleManagementId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobId");
-
-                    b.ToTable("CommentForJob");
+                    b.ToTable("Distributor");
                 });
 
             modelBuilder.Entity("Unilevel.Models.GroupRole", b =>
@@ -228,22 +218,6 @@ namespace Unilevel.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Unilevel.Models.JobDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LinkFileForCreatorReporter")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LinkFileForWorkingPerson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("JobDetail");
-                });
-
             modelBuilder.Entity("Unilevel.Models.JobForVisitation", b =>
                 {
                     b.Property<int>("Id")
@@ -252,19 +226,12 @@ namespace Unilevel.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Creator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("JobStatus")
-                        .HasColumnType("int");
 
                     b.Property<string>("Reporter")
                         .IsRequired()
@@ -340,115 +307,100 @@ namespace Unilevel.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b2880422-7eb6-46f9-9e85-5fa965ef7446",
-                            ConcurrencyStamp = "3c848f29-3933-4de2-9b02-0679e04fff4f",
+                            Id = "0caf9e5f-7a5f-4b9c-85c2-2bb61258c09e",
+                            ConcurrencyStamp = "224163d0-0e39-4940-8d5c-546e0860929a",
                             GroupRoleId = 1,
                             Name = "Owner",
                             NormalizedName = "OWNER"
                         },
                         new
                         {
-                            Id = "56d11230-8af1-450b-b956-03a60e445253",
-                            ConcurrencyStamp = "ccd062bd-48c2-44dc-aa65-5b4afd247d36",
+                            Id = "754630ed-db60-48a9-ade8-351015495f95",
+                            ConcurrencyStamp = "0660824d-1c48-47c8-b9da-1df9e97ff2f9",
                             GroupRoleId = 1,
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
-                            Id = "2512d810-b264-46de-8bd9-0163f4b424c5",
-                            ConcurrencyStamp = "6905a8c5-cf7f-41be-b92c-adb2b5f08d1d",
+                            Id = "33d10566-a071-4059-af3e-beb89366aefe",
+                            ConcurrencyStamp = "565fab63-4f3f-4022-a3bc-0fdf972bb2b7",
                             GroupRoleId = 2,
                             Name = "VPCD",
                             NormalizedName = "VPCD"
                         },
                         new
                         {
-                            Id = "1add0713-46b2-429b-927c-b699f02c836e",
-                            ConcurrencyStamp = "95f9cd71-412d-4546-9991-b5d591856410",
+                            Id = "99d7610d-05d8-4943-96bf-4a2d53c35730",
+                            ConcurrencyStamp = "72f30f12-513e-48b7-9b9e-98f9d3bfe492",
                             GroupRoleId = 2,
                             Name = "BM",
                             NormalizedName = "BM"
                         },
                         new
                         {
-                            Id = "4cbe0878-83a8-4fee-90b0-32b3bbe89f6f",
-                            ConcurrencyStamp = "fc0b80c7-f570-4632-9707-fe6be1b0700c",
+                            Id = "d47bd2e1-39da-4bfb-bf7a-009ece359573",
+                            ConcurrencyStamp = "3c435e88-8375-468b-8213-d9a5b25af207",
                             GroupRoleId = 2,
                             Name = "ChannelActivationHead",
                             NormalizedName = "CHANNEL ACTIVATION HEAD"
                         },
                         new
                         {
-                            Id = "c13ad8e5-e4cd-44ab-bd8f-b710e640ddb0",
-                            ConcurrencyStamp = "c574ddf8-3aaa-4fb9-b420-9866b72bccda",
+                            Id = "f5200f0b-ff8e-4f26-95e3-a2e8f2481d35",
+                            ConcurrencyStamp = "f1b43100-c7c1-40a6-a338-a3be809dbf8b",
                             GroupRoleId = 2,
                             Name = "ASM",
                             NormalizedName = "ASM"
                         },
                         new
                         {
-                            Id = "2dc822e3-2e11-4361-acfc-8e36277c4023",
-                            ConcurrencyStamp = "98c3595f-a1d1-4e5e-a2f7-1df4d06c26cd",
+                            Id = "4a598d10-e52c-48aa-b912-66441538a268",
+                            ConcurrencyStamp = "a2615de3-8178-473a-920e-9a903089c5ea",
                             GroupRoleId = 2,
                             Name = "BAM",
                             NormalizedName = "BAM"
                         },
                         new
                         {
-                            Id = "84544bd0-d0c3-4ca9-b20e-f0355dca77ca",
-                            ConcurrencyStamp = "bda764b9-c98c-4383-962c-c80d6388af34",
+                            Id = "3862f8b4-1217-4d05-a2d8-bba54e57f86b",
+                            ConcurrencyStamp = "47d90f80-46f5-445d-83c1-b5536a917573",
                             GroupRoleId = 2,
                             Name = "CE",
                             NormalizedName = "CE – CAPABILITY EXECUTIVE"
                         },
                         new
                         {
-                            Id = "3eda5566-8215-4347-ad46-0feaff022490",
-                            ConcurrencyStamp = "c94d7850-7921-4668-9bec-4e27473c0b2d",
+                            Id = "efe88328-43d9-409a-8420-ace5e3be6867",
+                            ConcurrencyStamp = "886fbd36-e3a1-4f1e-acd8-40129ad27493",
                             GroupRoleId = 2,
                             Name = "SaleSUP",
                             NormalizedName = "SALE SUP – SALE SUPERVISOR"
                         },
                         new
                         {
-                            Id = "2ed7a655-0d21-4fc8-90c7-2680c2d4ad35",
-                            ConcurrencyStamp = "c76d2312-651b-4a57-9347-8b5127aa26f5",
+                            Id = "331e8668-a635-4415-aaa6-f61f24bbd146",
+                            ConcurrencyStamp = "94ccee83-620b-43dc-b6fa-67fb4faae557",
                             GroupRoleId = 3,
                             Name = "distributorOMTL",
                             NormalizedName = "DISTRIBUTOROMTL"
                         },
                         new
                         {
-                            Id = "caf4a8d4-6c93-4c6f-bd18-dff913dd996e",
-                            ConcurrencyStamp = "c1723bc8-1e83-4bfa-ba3a-d35f43bd88cb",
+                            Id = "9c9af68e-6e97-4e39-87c7-a9d834d1f852",
+                            ConcurrencyStamp = "9a64eba4-32ea-46da-af69-9732f75b956b",
                             GroupRoleId = 4,
                             Name = "OtherDepartment",
                             NormalizedName = "OTHER DEPARTMENT"
                         },
                         new
                         {
-                            Id = "e044fa61-ddb3-433e-a9c0-ccb80ea024a5",
-                            ConcurrencyStamp = "b9a1fdd0-ed95-45e6-98d2-1bbd9cb0d3dc",
+                            Id = "ebe4a00e-5a42-49f4-b20d-5a79a6f1feb6",
+                            ConcurrencyStamp = "9136768c-4f11-4990-8e2a-a0615b705007",
                             GroupRoleId = 4,
                             Name = "Guest",
                             NormalizedName = "GUEST"
                         });
-                });
-
-            modelBuilder.Entity("Unilevel.Models.RolePermission", b =>
-                {
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("Unilevel.Models.SaleDistributor", b =>
@@ -463,7 +415,37 @@ namespace Unilevel.Migrations
 
                     b.HasIndex("SaleStaffId");
 
-                    b.ToTable("SaleDistributors", (string)null);
+                    b.ToTable("SaleDistributor");
+                });
+
+            modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("SuperiorId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SuperiorId");
+
+                    b.ToTable("SaleStaff");
+                });
+
+            modelBuilder.Entity("Unilevel.Models.UserPermission", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("UserPermissions");
                 });
 
             modelBuilder.Entity("Unilevel.Models.VisitCalendar", b =>
@@ -602,29 +584,6 @@ namespace Unilevel.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
-                {
-                    b.HasBaseType("User");
-
-                    b.Property<string>("SaleManagementId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("Distributors", (string)null);
-                });
-
-            modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
-                {
-                    b.HasBaseType("User");
-
-                    b.Property<string>("SuperiorId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasIndex("SuperiorId");
-
-                    b.ToTable("SaleStaff", (string)null);
-                });
-
             modelBuilder.Entity("ImplementationDate", b =>
                 {
                     b.HasOne("Unilevel.Models.VisitCalendar", "VisitCalendar")
@@ -687,26 +646,6 @@ namespace Unilevel.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Unilevel.Models.CommentForJob", b =>
-                {
-                    b.HasOne("Unilevel.Models.JobDetail", "JobDetail")
-                        .WithMany("CommentForJob")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("JobDetail");
-                });
-
-            modelBuilder.Entity("Unilevel.Models.JobDetail", b =>
-                {
-                    b.HasOne("Unilevel.Models.JobForVisitation", null)
-                        .WithOne("JobDetail")
-                        .HasForeignKey("Unilevel.Models.JobDetail", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Unilevel.Models.JobForVisitation", b =>
                 {
                     b.HasOne("Unilevel.Models.VisitCalendar", "VisitCalendar")
@@ -729,35 +668,16 @@ namespace Unilevel.Migrations
                     b.Navigation("GroupRole");
                 });
 
-            modelBuilder.Entity("Unilevel.Models.RolePermission", b =>
-                {
-                    b.HasOne("Unilevel.Models.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Unilevel.Models.Role", "Role")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("Unilevel.Models.SaleDistributor", b =>
                 {
                     b.HasOne("Unilevel.Models.Distributor", "Distributor")
-                        .WithMany("SaleDistributors")
+                        .WithMany()
                         .HasForeignKey("DistributorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Unilevel.Models.SaleStaff", "SaleStaff")
-                        .WithMany("SaleDistributors")
+                        .WithMany()
                         .HasForeignKey("SaleStaffId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -765,6 +685,35 @@ namespace Unilevel.Migrations
                     b.Navigation("Distributor");
 
                     b.Navigation("SaleStaff");
+                });
+
+            modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
+                {
+                    b.HasOne("Unilevel.Models.SaleStaff", "Superior")
+                        .WithMany("Inferiors")
+                        .HasForeignKey("SuperiorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Superior");
+                });
+
+            modelBuilder.Entity("Unilevel.Models.UserPermission", b =>
+                {
+                    b.HasOne("Unilevel.Models.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Unilevel.Models.VisitCalendar", b =>
@@ -814,45 +763,9 @@ namespace Unilevel.Migrations
                     b.Navigation("Areas");
                 });
 
-            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
-                {
-                    b.HasOne("User", null)
-                        .WithOne()
-                        .HasForeignKey("Unilevel.Models.Distributor", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
                 {
-                    b.HasOne("User", null)
-                        .WithOne()
-                        .HasForeignKey("Unilevel.Models.SaleStaff", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.HasOne("Unilevel.Models.SaleStaff", "Superior")
-                        .WithMany("Inferiors")
-                        .HasForeignKey("SuperiorId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Superior");
-                });
-
-            modelBuilder.Entity("Unilevel.Models.JobDetail", b =>
-                {
-                    b.Navigation("CommentForJob");
-                });
-
-            modelBuilder.Entity("Unilevel.Models.JobForVisitation", b =>
-                {
-                    b.Navigation("JobDetail")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Unilevel.Models.Role", b =>
-                {
-                    b.Navigation("RolePermissions");
+                    b.Navigation("Inferiors");
                 });
 
             modelBuilder.Entity("Unilevel.Models.VisitCalendar", b =>
@@ -860,18 +773,6 @@ namespace Unilevel.Migrations
                     b.Navigation("ImplementationDates");
 
                     b.Navigation("Visitors");
-                });
-
-            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
-                {
-                    b.Navigation("SaleDistributors");
-                });
-
-            modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
-                {
-                    b.Navigation("Inferiors");
-
-                    b.Navigation("SaleDistributors");
                 });
 #pragma warning restore 612, 618
         }

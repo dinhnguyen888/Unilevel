@@ -19,6 +19,7 @@ namespace Unilevel.Controllers
 
 
         // lay danh sach user co trong database (bao gom ca admin va owner )
+        [CustomAuthorize("ViewUsers", 1)]
         [HttpGet("list")]
         public async Task<IActionResult> ListAllUsers()
         {

@@ -22,7 +22,7 @@ public class EmailService
 
         var response = await _sendGridClient.SendEmailAsync(msg);
 
-        // Log the status code and response body for debugging
+
         if (response.StatusCode != System.Net.HttpStatusCode.OK)
         {
             var responseBody = await response.Body.ReadAsStringAsync();

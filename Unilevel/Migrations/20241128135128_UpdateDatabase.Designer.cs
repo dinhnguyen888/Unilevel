@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Unilevel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241128135128_UpdateDatabase")]
+    partial class UpdateDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,6 +191,20 @@ namespace Unilevel.Migrations
                     b.ToTable("CommentForJob");
                 });
 
+            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("SaleManagementId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Distributor");
+                });
+
             modelBuilder.Entity("Unilevel.Models.GroupRole", b =>
                 {
                     b.Property<int>("GroupRoleId")
@@ -340,96 +356,96 @@ namespace Unilevel.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b2880422-7eb6-46f9-9e85-5fa965ef7446",
-                            ConcurrencyStamp = "3c848f29-3933-4de2-9b02-0679e04fff4f",
+                            Id = "ff4b3bb0-142d-4554-992f-9ca51892c8d1",
+                            ConcurrencyStamp = "87a5af42-4fdc-46e7-9b3c-c546d04d95d7",
                             GroupRoleId = 1,
                             Name = "Owner",
                             NormalizedName = "OWNER"
                         },
                         new
                         {
-                            Id = "56d11230-8af1-450b-b956-03a60e445253",
-                            ConcurrencyStamp = "ccd062bd-48c2-44dc-aa65-5b4afd247d36",
+                            Id = "d26fc17b-182e-4fb4-b54c-32119f9087b5",
+                            ConcurrencyStamp = "7b5fcaf1-313d-4490-8f91-ffd613a747d4",
                             GroupRoleId = 1,
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
-                            Id = "2512d810-b264-46de-8bd9-0163f4b424c5",
-                            ConcurrencyStamp = "6905a8c5-cf7f-41be-b92c-adb2b5f08d1d",
+                            Id = "9922500e-f20c-4ab6-b8bd-b52668eb978b",
+                            ConcurrencyStamp = "77d0497b-82db-434d-8488-cbc19b4c126a",
                             GroupRoleId = 2,
                             Name = "VPCD",
                             NormalizedName = "VPCD"
                         },
                         new
                         {
-                            Id = "1add0713-46b2-429b-927c-b699f02c836e",
-                            ConcurrencyStamp = "95f9cd71-412d-4546-9991-b5d591856410",
+                            Id = "d5990ea8-722b-4d11-bdfe-0214fbc9a43f",
+                            ConcurrencyStamp = "f1c3bbdf-b32b-4689-b138-f8e4b1fc7bcb",
                             GroupRoleId = 2,
                             Name = "BM",
                             NormalizedName = "BM"
                         },
                         new
                         {
-                            Id = "4cbe0878-83a8-4fee-90b0-32b3bbe89f6f",
-                            ConcurrencyStamp = "fc0b80c7-f570-4632-9707-fe6be1b0700c",
+                            Id = "586c713c-672a-46df-9b1b-ca866ee8b994",
+                            ConcurrencyStamp = "aa47816a-e4db-4bb2-a1ef-5a663d64e193",
                             GroupRoleId = 2,
                             Name = "ChannelActivationHead",
                             NormalizedName = "CHANNEL ACTIVATION HEAD"
                         },
                         new
                         {
-                            Id = "c13ad8e5-e4cd-44ab-bd8f-b710e640ddb0",
-                            ConcurrencyStamp = "c574ddf8-3aaa-4fb9-b420-9866b72bccda",
+                            Id = "41da2aa3-d04f-4415-8740-9e931ebf6056",
+                            ConcurrencyStamp = "c01e103b-ee6b-4791-a220-e3f60fa53dde",
                             GroupRoleId = 2,
                             Name = "ASM",
                             NormalizedName = "ASM"
                         },
                         new
                         {
-                            Id = "2dc822e3-2e11-4361-acfc-8e36277c4023",
-                            ConcurrencyStamp = "98c3595f-a1d1-4e5e-a2f7-1df4d06c26cd",
+                            Id = "8eee0adb-a1ef-4b43-9ac9-4c67a551e09f",
+                            ConcurrencyStamp = "e226f9c1-a0b9-4b7c-88b2-d0891b5dbe98",
                             GroupRoleId = 2,
                             Name = "BAM",
                             NormalizedName = "BAM"
                         },
                         new
                         {
-                            Id = "84544bd0-d0c3-4ca9-b20e-f0355dca77ca",
-                            ConcurrencyStamp = "bda764b9-c98c-4383-962c-c80d6388af34",
+                            Id = "ef08cd3d-7f1e-4e34-972c-0964aa6b8b4b",
+                            ConcurrencyStamp = "4fedacd9-7483-4f25-9d6f-97e1e5b3e43e",
                             GroupRoleId = 2,
                             Name = "CE",
                             NormalizedName = "CE – CAPABILITY EXECUTIVE"
                         },
                         new
                         {
-                            Id = "3eda5566-8215-4347-ad46-0feaff022490",
-                            ConcurrencyStamp = "c94d7850-7921-4668-9bec-4e27473c0b2d",
+                            Id = "991f521b-8bf0-4e58-962e-eac5173c7995",
+                            ConcurrencyStamp = "00529fe7-6fdb-4846-9aff-6f5aebdf3b7d",
                             GroupRoleId = 2,
                             Name = "SaleSUP",
                             NormalizedName = "SALE SUP – SALE SUPERVISOR"
                         },
                         new
                         {
-                            Id = "2ed7a655-0d21-4fc8-90c7-2680c2d4ad35",
-                            ConcurrencyStamp = "c76d2312-651b-4a57-9347-8b5127aa26f5",
+                            Id = "18a5d4ed-87cd-48d9-96ab-1cfe76a1128d",
+                            ConcurrencyStamp = "66d6093e-15b9-4183-8a7c-7449534eac07",
                             GroupRoleId = 3,
                             Name = "distributorOMTL",
                             NormalizedName = "DISTRIBUTOROMTL"
                         },
                         new
                         {
-                            Id = "caf4a8d4-6c93-4c6f-bd18-dff913dd996e",
-                            ConcurrencyStamp = "c1723bc8-1e83-4bfa-ba3a-d35f43bd88cb",
+                            Id = "8dabd8bd-c17d-4a4e-bf57-1ab8b7cac286",
+                            ConcurrencyStamp = "de3201d7-45c9-4c57-9313-cd90949225e6",
                             GroupRoleId = 4,
                             Name = "OtherDepartment",
                             NormalizedName = "OTHER DEPARTMENT"
                         },
                         new
                         {
-                            Id = "e044fa61-ddb3-433e-a9c0-ccb80ea024a5",
-                            ConcurrencyStamp = "b9a1fdd0-ed95-45e6-98d2-1bbd9cb0d3dc",
+                            Id = "cf72db1d-c01d-4851-889e-00f6945264cf",
+                            ConcurrencyStamp = "9351fee9-11cd-4412-be40-5cb544478a29",
                             GroupRoleId = 4,
                             Name = "Guest",
                             NormalizedName = "GUEST"
@@ -602,17 +618,6 @@ namespace Unilevel.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
-                {
-                    b.HasBaseType("User");
-
-                    b.Property<string>("SaleManagementId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("Distributors", (string)null);
-                });
-
             modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
                 {
                     b.HasBaseType("User");
@@ -738,7 +743,7 @@ namespace Unilevel.Migrations
                         .IsRequired();
 
                     b.HasOne("Unilevel.Models.Role", "Role")
-                        .WithMany("RolePermissions")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -751,13 +756,13 @@ namespace Unilevel.Migrations
             modelBuilder.Entity("Unilevel.Models.SaleDistributor", b =>
                 {
                     b.HasOne("Unilevel.Models.Distributor", "Distributor")
-                        .WithMany("SaleDistributors")
+                        .WithMany()
                         .HasForeignKey("DistributorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Unilevel.Models.SaleStaff", "SaleStaff")
-                        .WithMany("SaleDistributors")
+                        .WithMany()
                         .HasForeignKey("SaleStaffId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -814,15 +819,6 @@ namespace Unilevel.Migrations
                     b.Navigation("Areas");
                 });
 
-            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
-                {
-                    b.HasOne("User", null)
-                        .WithOne()
-                        .HasForeignKey("Unilevel.Models.Distributor", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
                 {
                     b.HasOne("User", null)
@@ -850,11 +846,6 @@ namespace Unilevel.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Unilevel.Models.Role", b =>
-                {
-                    b.Navigation("RolePermissions");
-                });
-
             modelBuilder.Entity("Unilevel.Models.VisitCalendar", b =>
                 {
                     b.Navigation("ImplementationDates");
@@ -862,16 +853,9 @@ namespace Unilevel.Migrations
                     b.Navigation("Visitors");
                 });
 
-            modelBuilder.Entity("Unilevel.Models.Distributor", b =>
-                {
-                    b.Navigation("SaleDistributors");
-                });
-
             modelBuilder.Entity("Unilevel.Models.SaleStaff", b =>
                 {
                     b.Navigation("Inferiors");
-
-                    b.Navigation("SaleDistributors");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Unilevel.DTOs;
+using Unilevel.Models;
 
 namespace Unilevel.Services
 {
@@ -10,9 +11,9 @@ namespace Unilevel.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly AppDbContext _appDbContext;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly IConfiguration _configuration;
-        public SystemUserService(UserManager<User> userManager, AppDbContext appDbContext, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public SystemUserService(UserManager<User> userManager, AppDbContext appDbContext, RoleManager<Role> roleManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _appDbContext = appDbContext;
@@ -34,7 +35,7 @@ namespace Unilevel.Services
                                             Email = user.Email,
                                             Address = user.Address,
                                             Role = role.Name,
-                                            Area = user.Area,
+                                            AreaId  = user.AreaId,
                                             JoinDate = user.JoinDate,
                                             IsActive = user.IsActive,
                                             Reporter = user.Reporter,
@@ -53,7 +54,7 @@ namespace Unilevel.Services
                 Email = account.Email,
                 PhoneNumber = account.PhoneNumber,
                 Address = account.Address,
-                Area = account.Area,
+                AreaId = account.AreaId,
                 JoinDate = account.JoinDate,
                 IsActive = account.IsActive,
                 Reporter = account.Reporter ?? null,
@@ -64,7 +65,7 @@ namespace Unilevel.Services
             if (result.Succeeded)
             {
                 
-                var role = account.Role ?? "Guest"; 
+                var role = account.Role ; 
                 if (await _roleManager.RoleExistsAsync(role))
                 {
                     await _userManager.AddToRoleAsync(user, role);
@@ -116,7 +117,7 @@ namespace Unilevel.Services
             user.PhoneNumber = account.PhoneNumber;
             user.Email = account.Email;
             user.Address = account.Address;
-            user.Area = account.Area;
+            user.AreaId = account.AreaId;
             user.JoinDate = account.JoinDate;
             user.IsActive = account.IsActive;
             user.Reporter = account.Reporter;
@@ -150,7 +151,7 @@ namespace Unilevel.Services
         {
             var users = await _userManager.Users
                 .Where(user => user.UserName.Contains(searchTerm) || user.Email.Contains(searchTerm) ||
-                        user.Address.Contains(searchTerm) || user.Area.Contains(searchTerm) || 
+                        user.Address.Contains(searchTerm) || user.AreaId.Contains(searchTerm) || 
                         user.PhoneNumber.Contains(searchTerm))
                 .ToListAsync();
 
@@ -165,7 +166,7 @@ namespace Unilevel.Services
                     Email = user.Email,
                     Address = user.Address,
                     Role = roles.FirstOrDefault(),
-                    Area = user.Area,
+                    AreaId = user.AreaId,
                     JoinDate = user.JoinDate
                 });
             }
@@ -246,7 +247,7 @@ namespace Unilevel.Services
                                 Email = email,
                                 PhoneNumber = phoneNumber,
                                 Address = address,
-                                Area = area,
+                                AreaId = area,
                                 JoinDate = joinDate,
                                 IsActive = isActive
                             };
@@ -272,7 +273,7 @@ namespace Unilevel.Services
                             existingUser.Email = email;
                             existingUser.PhoneNumber = phoneNumber;
                             existingUser.Address = address;
-                            existingUser.Area = area;
+                            existingUser.AreaId = area;
                             existingUser.JoinDate = joinDate;
                             existingUser.IsActive = isActive;
 
@@ -359,7 +360,7 @@ namespace Unilevel.Services
                     worksheet.Cell(row, 2).Value = user.Email;
                     worksheet.Cell(row, 3).Value = user.PhoneNumber;
                     worksheet.Cell(row, 4).Value = user.Address;
-                    worksheet.Cell(row, 5).Value = user.Area;
+                    worksheet.Cell(row, 5).Value = user.AreaId;
                     worksheet.Cell(row, 6).Value = user.JoinDate;
                     worksheet.Cell(row, 7).Value = roles.FirstOrDefault();
                     worksheet.Cell(row, 8).Value = isActive ?? false;

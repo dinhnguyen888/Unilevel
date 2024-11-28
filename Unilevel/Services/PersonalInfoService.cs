@@ -41,7 +41,7 @@ public class PersonalInfoService
             Email = user.Email,
             Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault(),
             Address = user.Address, 
-            Area = user.Area,  
+            AreaId = user.AreaId,  
             JoinDate = user.JoinDate,
             PathPicture = user.PathPicture
         };
@@ -64,7 +64,7 @@ public class PersonalInfoService
         user.Email = updatedUser.Email;
         user.PhoneNumber = updatedUser.PhoneNumber;
         user.Address = updatedUser.Address;
-        user.Area = updatedUser.Area;
+        user.AreaId = updatedUser.AreaId;
         user.PathPicture = updatedUser.PathPicture;
 
         return await _userManager.UpdateAsync(user);

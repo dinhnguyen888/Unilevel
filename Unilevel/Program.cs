@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -8,7 +9,9 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Security.Claims;
 using System.Text;
 using Unilevel.Controllers;
+using Unilevel.Models;
 using Unilevel.Services;
+using Unilevel.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +20,7 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -28,6 +31,19 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PersonalInfoService>();
 builder.Services.AddScoped<SystemUserService>();
+builder.Services.AddScoped<AreaService>();
+builder.Services.AddScoped<VisitCalendarService>();
+builder.Services.AddScoped<JobForVisitationService>();
+builder.Services.AddScoped<DistributorService>();
+builder.Services.AddScoped<RoleService>();
+builder.Services.AddScoped<PermissionService>();
+
+builder.Services.AddSignalR();
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // max 50 mb 
+});
+
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 string secretKey = jwtSettings["Key"];
@@ -82,6 +98,9 @@ builder.Services.AddSwaggerGen(options =>
             new string[] { }
         }
     });
+
+    options.OperationFilter<SwaggerFileOperationFilter>();
+    options.OperationFilter<AddFileUploadOperationFilter>();
 });
 
 var app = builder.Build();
@@ -113,5 +132,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<CommentHub>("/yourHub");
 app.Run();

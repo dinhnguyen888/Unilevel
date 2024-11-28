@@ -6,6 +6,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Unilevel.Models;
+
 
 public class AuthService
 {
@@ -13,13 +16,15 @@ public class AuthService
     private readonly SignInManager<User> _signInManager;
     private readonly EmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly AppDbContext _appDbContext;
 
-    public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, EmailService emailService, IConfiguration configuration)
+    public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, EmailService emailService, IConfiguration configuration, AppDbContext appDbContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
         _configuration = configuration;
+        _appDbContext = appDbContext;
     }
 
 
@@ -56,6 +61,22 @@ public class AuthService
     private async Task<string> GenerateJwtTokenAsync(User user)
     {
         var roles = await _userManager.GetRolesAsync(user);
+        var groupRoleId = await _appDbContext.Roles
+            .Where(r => roles.Contains(r.Name))
+            .Select(r => r.GroupRole.GroupRoleId)
+            .Distinct()
+            .ToListAsync();
+        var rolesPermissions = await _appDbContext.RolePermissions
+        .Where(up => roles.Contains(up.Role.Name))
+        .Select(up => up.Permission.PermissionName) 
+        .Distinct()
+        .ToListAsync();
+
+
+        if (groupRoleId == null || !groupRoleId.Any())
+        {
+            return null;  
+        }
         
 
         var jwtSettings = _configuration.GetSection("Jwt");
@@ -68,7 +89,10 @@ public class AuthService
             new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
+        //claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role))); [GroupRoleAuthorize(1)]
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        claims.AddRange(groupRoleId.Select(gr => new Claim("GroupRole", gr.ToString())));
+        claims.AddRange(rolesPermissions.Select(permission => new Claim("Permission", permission)));
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
