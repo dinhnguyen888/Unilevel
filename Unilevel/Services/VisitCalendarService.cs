@@ -18,13 +18,15 @@ namespace Unilevel.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+
+        // Ham tinh nang lay quyen truy cap User
         public (List<string> Permissions, string UserId) GetUserPermissions()
         {
             var user = _httpContextAccessor.HttpContext?.User;
 
             if (user == null || !user.Identity.IsAuthenticated)
             {
-                throw new UnauthorizedAccessException("User is not authenticated.");
+                throw new UnauthorizedAccessException("User chua dang nhap.");
             }
 
             var permissions = user.Claims
@@ -36,12 +38,14 @@ namespace Unilevel.Services
 
             if (string.IsNullOrEmpty(userId))
             {
-                throw new UnauthorizedAccessException("Unable to retrieve user information.");
+                throw new UnauthorizedAccessException("UserId khong hop le.");
             }
 
             return (permissions, userId);
         }
 
+
+        // Len lich vieng tham
         public void ScheduleVisitCalendar(
             List<DateTime> implementationDates,
             string implementationTime,
@@ -53,31 +57,31 @@ namespace Unilevel.Services
         {
             var (_, userId) = GetUserPermissions();
 
-            // Lấy danh sách khách mời từ IDs
+            // Lay danh sach khac moi
             var visitors = _appDbContext.Users
                 .Where(u => visitorIds.Contains(u.Id))
                 .ToList();
 
             if (visitors.Count != visitorIds.Count)
             {
-                throw new Exception("Không tìm thấy một số khách mời.");
+                throw new Exception("Khong tim thay khach moi.");
             }
 
-            // Lặp qua từng ngày thực hiện để tạo lịch
+            // dung foreach de tao lich
             foreach (var date in implementationDates)
             {
                 var visitCalendar = new VisitCalendar
                 {
-                    CalendarCreatorId = userId, 
-                    ImplementationTime = implementationTime, 
+                    CalendarCreatorId = userId,
+                    ImplementationTime = implementationTime,
                     VisitPurpose = visitPurpose,
                     DistributorId = distributorId,
                     Visitors = visitors.Select(v => new Visitor { VisitorId = v.Id }).ToList(),
-                    VisitCalendarStatus = "IsVisited"
-                    
+                    VisitCalendarStatus = VisitCalendar.Status.isVisited
+
                 };
 
-                // Thêm ngày thực hiện vào ImplementationDates
+                // Them ngay thuc hien vao ImplementionDate
                 _appDbContext.ImplementationDate.Add(new ImplementationDate
                 {
                     Date = date,
@@ -87,9 +91,12 @@ namespace Unilevel.Services
                 _appDbContext.VisitCalendar.Add(visitCalendar);
             }
 
-            // Lưu thay đổi vào cơ sở dữ liệu
+            // Luu vao csdl
             _appDbContext.SaveChanges();
         }
+
+
+        // Lay ten nha phan phoi ( ham tinh nang )
         private string GetDistributorName(string distributorId)
         {
             return _appDbContext.Users
@@ -98,6 +105,8 @@ namespace Unilevel.Services
                 .FirstOrDefault() ?? "Unknown";
         }
 
+
+        // Lay tat ca lich vieng tham
         public List<VisitCalendarDTO> GetAllVisitCalendar()
         {
             var calendars = _appDbContext.VisitCalendar
@@ -118,10 +127,12 @@ namespace Unilevel.Services
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
                 DistributorName = GetDistributorName(vc.DistributorId),
-                VisitCalendarStatus = vc.VisitCalendarStatus
+                VisitCalendarStatus = vc.VisitCalendarStatus.ToString() 
             }).ToList();
         }
 
+
+        // Lay lich vieng tham theo AreaId
         public List<VisitCalendarDTO> GetVisitCalendarByAreaId(string userId)
         {
             var currentUser = _appDbContext.Users
@@ -155,10 +166,12 @@ namespace Unilevel.Services
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
                 DistributorName = GetDistributorName(vc.DistributorId),
-                VisitCalendarStatus = vc.VisitCalendarStatus
+                VisitCalendarStatus = vc.VisitCalendarStatus.ToString()
             }).ToList();
         }
 
+
+        // Ham tim kiem 
         public List<VisitCalendarDTO> SearchVisitCalendars(string keyword)
         {
             var calendars = _appDbContext.VisitCalendar
@@ -183,10 +196,12 @@ namespace Unilevel.Services
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
                 DistributorName = GetDistributorName(vc.DistributorId),
-                VisitCalendarStatus = vc.VisitCalendarStatus
+                VisitCalendarStatus = vc.VisitCalendarStatus.ToString()
             }).ToList();
         }
 
+
+        // Ham loc Lich vieng tham
         public List<VisitCalendarDTO> FilterVisitCalendars(DateTime? startDate, DateTime? endDate, string status, string distributorId)
         {
             var query = _appDbContext.VisitCalendar
@@ -213,7 +228,7 @@ namespace Unilevel.Services
 
             if (!string.IsNullOrEmpty(status))
             {
-                query = query.Where(vc => vc.VisitCalendarStatus == status);
+                query = query.Where(vc => vc.VisitCalendarStatus.ToString() == status);
             }
 
             if (!string.IsNullOrEmpty(distributorId))
@@ -236,10 +251,12 @@ namespace Unilevel.Services
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
                 DistributorName = GetDistributorName(vc.DistributorId),
-                VisitCalendarStatus = vc.VisitCalendarStatus
+                VisitCalendarStatus = vc.VisitCalendarStatus.ToString()
             }).ToList();
         }
 
+
+        // Lay lich vieng tham trong qua khu
         public List<VisitCalendarDTO> GetVisitHistory()
         {
             var today = DateTime.Now.Date;
@@ -248,10 +265,10 @@ namespace Unilevel.Services
                 .Include(vc => vc.User)
                 .Include(vc => vc.Visitors)
                .Where(vc =>
-                       (vc.ImplementationDates.All(date => date.Date < today) || // Tất cả ngày thực hiện trong quá khứ
-                        vc.VisitCalendarStatus == "IsVisited" ||
-                        vc.VisitCalendarStatus == "NotVisited") ||
-                        vc.VisitCalendarStatus == "Abort")
+                       (vc.ImplementationDates.All(date => date.Date < today) || // Tat ca ngay thuc hien trong qua khu
+                        vc.VisitCalendarStatus == VisitCalendar.Status.isVisited ||
+                        vc.VisitCalendarStatus == VisitCalendar.Status.notVisited) ||
+                        vc.VisitCalendarStatus == VisitCalendar.Status.Abort)
                         .ToList();
 
             var users = _appDbContext.Users.ToDictionary(u => u.Id, u => u.UserName);
@@ -267,12 +284,14 @@ namespace Unilevel.Services
                 ImplementationTime = vc.ImplementationTime,
                 VisitPurpose = vc.VisitPurpose,
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
+                VisitCalendarStatus = vc.VisitCalendarStatus.ToString(),
                 DistributorId = vc.DistributorId,
                 DistributorName = users.ContainsKey(vc.DistributorId) ? users[vc.DistributorId] : "Unknown"
             }).ToList();
         }
 
-        // Phương thức lấy danh sách chuyến thăm sắp tới
+
+        // Lay danh sach lich vieng tham sap toi
         public List<VisitCalendarDTO> GetUpcomingVisits()
         {
             var today = DateTime.Now.Date;
@@ -281,9 +300,9 @@ namespace Unilevel.Services
                 .Include(vc => vc.User)
                 .Include(vc => vc.Visitors)
                 .Where(vc =>
-                    vc.ImplementationDates.Any(date => date.Date >= today) && // Có ít nhất một ngày thực hiện hôm nay hoặc tương lai
-                    vc.VisitCalendarStatus != "IsVisited" && // Chưa thực hiện
-                    vc.VisitCalendarStatus != "Abort")  // Chưa hủy
+                    vc.ImplementationDates.Any(date => date.Date >= today) && // Co it nhat mot ngay thuc hien trong hom nay hoac ngay mai
+                    vc.VisitCalendarStatus != VisitCalendar.Status.isVisited && // Chua thuc hien
+                    vc.VisitCalendarStatus != VisitCalendar.Status.Abort)  // Chua huy
                 .ToList();
 
             var users = _appDbContext.Users.ToDictionary(u => u.Id, u => u.UserName);
@@ -300,8 +319,94 @@ namespace Unilevel.Services
                 VisitPurpose = vc.VisitPurpose,
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
+                VisitCalendarStatus = vc.VisitCalendarStatus.ToString(),
                 DistributorName = users.ContainsKey(vc.DistributorId) ? users[vc.DistributorId] : "Unknown"
             }).ToList();
         }
+
+
+        // Tu choi lich vieng tham
+        public void RefuseVisitInvitation(int visitCalendarId, string visitorId)
+        {
+            // check tham so
+            var visitCalendar = _appDbContext.VisitCalendar
+                .Include(vc => vc.Visitors)
+                .FirstOrDefault(vc => vc.Id == visitCalendarId);
+
+            if (visitCalendar == null)
+            {
+                throw new Exception("visitCalendarId khong hop le.");
+            }
+
+            var visitor = visitCalendar.Visitors
+                .FirstOrDefault(v => v.VisitorId == visitorId);
+
+            if (visitor == null)
+            {
+                throw new Exception("visitorId khong hop le.");
+            }
+
+            // cap nhat trang thai tu choi
+            visitor.IsRefuseInvitation = true;
+
+            _appDbContext.SaveChanges();
+        }
+
+
+        // Huy lich vieng tham
+        public void CancelVisitCalendar(int visitCalendarId)
+        {
+            // Check tham so
+            var visitCalendar = _appDbContext.VisitCalendar
+                .FirstOrDefault(vc => vc.Id == visitCalendarId);
+
+            if (visitCalendar == null)
+            {
+                throw new Exception("Khong tim thay lich vieng tham.");
+            }
+
+            // Chuyen lich vieng tham sang trang thai Abort
+            visitCalendar.VisitCalendarStatus = VisitCalendar.Status.Abort;
+
+            _appDbContext.SaveChanges();
+        }
+
+
+        //Xoa lich vieng tham
+        public void DeleteVisitCalendar(int visitCalendarId)
+        {
+            // Check tham so
+            var visitCalendar = _appDbContext.VisitCalendar
+                .Include(vc => vc.Visitors)
+                .FirstOrDefault(vc => vc.Id == visitCalendarId);
+
+            if (visitCalendar == null)
+            {
+                throw new Exception("Không tìm thấy lịch viếng thăm.");
+            }
+
+            // kiem tra trang thai lich vieng tham
+            if (visitCalendar.VisitCalendarStatus != VisitCalendar.Status.Abort)
+            {
+                throw new Exception("Chỉ có thể xóa lịch viếng thăm có trạng thái 'Abort'.");
+            }
+
+            // Xoa cac ngay lien quan den lich
+            var implementationDates = _appDbContext.ImplementationDate
+                .Where(d => d.VisitCalendarId == visitCalendarId)
+                .ToList();
+            _appDbContext.ImplementationDate.RemoveRange(implementationDates);
+
+            // Xoa khach moi 
+            _appDbContext.Visitors.RemoveRange(visitCalendar.Visitors);
+
+            // Xoa Lich vieng tham
+            _appDbContext.VisitCalendar.Remove(visitCalendar);
+
+            // Luu lai
+            _appDbContext.SaveChanges();
+        }
+
+
     }
 }

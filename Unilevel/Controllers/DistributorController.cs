@@ -1,60 +1,80 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Unilevel.DTOs;
-using Unilevel.Services;
+using System.Threading.Tasks;
 
-namespace Unilevel.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class DistributorsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class DistributorController : ControllerBase
+    private readonly DistributorService _service;
+
+    public DistributorsController(DistributorService service)
     {
-        private readonly DistributorService _distributorService;
+        _service = service;
+    }
 
-        public DistributorController(DistributorService distributorService)
-        {
-            _distributorService = distributorService;
-        }
+    /// <summary>
+    /// Tao moi mot nha phan phoi
+    /// </summary>
+    /// <param name="dto">Thong tin nha phan phoi</param>
+    /// <returns>Nha phan phoi vua duoc tao</returns>
+    [CustomAuthorize("Can Post Distributor", 1)]
+    [HttpPost]
+    public async Task<IActionResult> CreateDistributor([FromBody] DistributorDTO dto)
+    {
+        var distributor = await _service.CreateDistributorAsync(dto);
+        return CreatedAtAction(nameof(GetDistributorById), new { id = distributor.Id }, distributor);
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> AddDistributor(DistributorDTO distributorDto)
-        {
-            try
-            {
-                await _distributorService.AddDistributorAsync(distributorDto);
-                return Ok("Distributor added successfully.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Cap nhat thong tin nha phan phoi
+    /// </summary>
+    /// <param name="id">Dinh danh nha phan phoi</param>
+    /// <param name="dto">Thong tin cap nhat</param>
+    /// <returns>Ket qua cap nhat</returns>
+    [CustomAuthorize("Can Update Distributor", 1)]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateDistributor(string id, [FromBody] DistributorDTO dto)
+    {
+        var result = await _service.UpdateDistributorAsync(id, dto);
+        return result ? NoContent() : NotFound("Khong tim thay nha phan phoi.");
+    }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDistributor(string id, DistributorDTO distributorDto)
-        {
-            try
-            {
-                await _distributorService.UpdateDistributorAsync(id, distributorDto);
-                return Ok("Distributor updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Xoa mot nha phan phoi
+    /// </summary>
+    /// <param name="id">Dinh danh nha phan phoi can xoa</param>
+    /// <returns>Ket qua xoa</returns>
+    [CustomAuthorize("Can Delete Distributor", 1)]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteDistributor(string id)
+    {
+        var result = await _service.DeleteDistributorAsync(id);
+        return result ? NoContent() : NotFound("Khong tim thay nha phan phoi.");
+    }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDistributor(string id)
-        {
-            try
-            {
-                await _distributorService.DeleteDistributorAsync(id);
-                return Ok("Distributor deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+    /// <summary>
+    /// Lay danh sach tat ca cac nha phan phoi
+    /// </summary>
+    /// <returns>Danh sach nha phan phoi</returns>
+    [GroupRoleAuthorize(1)]
+    [HttpGet]
+    public async Task<IActionResult> GetAllDistributors()
+    {
+        var distributors = await _service.GetAllDistributorsAsync();
+        return Ok(distributors);
+    }
+
+    /// <summary>
+    /// Lay thong tin nha phan phoi theo ID
+    /// </summary>
+    /// <param name="id">Dinh danh nha phan phoi</param>
+    /// <returns>Thong tin nha phan phoi</returns>
+    [GroupRoleAuthorize(1)]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetDistributorById(string id)
+    {
+        var distributor = await _service.GetDistributorByIdAsync(id);
+        return distributor == null ? NotFound("Khong tim thay nha phan phoi.") : Ok(distributor);
     }
 }

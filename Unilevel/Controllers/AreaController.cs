@@ -1,19 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Unilevel.Models;
-
+/// <summary>
+/// Cac chuc nang lien quan den quan ly vung khu vuc
+/// </summary>
 [ApiController]
 [Route("api/for-owner/[controller]")]
 public class AreaController : ControllerBase
 {
     private readonly AreaService _areaService;
 
-    public AreaController(AreaService areaService) 
+    public AreaController(AreaService areaService)
     {
         _areaService = areaService;
     }
 
-
-    // Them
+    /// <summary>
+    /// Them moi khu vuc.
+    /// </summary>
+    /// <param name="area">Thong tin khu vuc.</param>
+    /// <returns>Tra ve khu vuc da duoc tao.</returns>
+    [GroupRoleAuthorize(1)]
     [HttpPost]
     public async Task<IActionResult> CreateArea([FromBody] Area area)
     {
@@ -24,8 +30,10 @@ public class AreaController : ControllerBase
         return CreatedAtAction(nameof(CreateArea), new { id = createdArea.AreaId }, createdArea);
     }
 
-
-    // Doc
+    /// <summary>
+    /// Lay danh sach tat ca cac khu vuc.
+    /// </summary>
+    /// <returns>Danh sach cac khu vuc.</returns>
     [HttpGet]
     public async Task<IActionResult> GetAllAreas()
     {
@@ -33,8 +41,12 @@ public class AreaController : ControllerBase
         return Ok(areas);
     }
 
-
-    // Tim kiem theo ten khu vuc
+    /// <summary>
+    /// Tim kiem khu vuc theo ten.
+    /// </summary>
+    /// <param name="name">Ten khu vuc can tim.</param>
+    /// <returns>Tra ve thong tin khu vuc tim thay.</returns>
+    [GroupRoleAuthorize(1)]
     [HttpGet("search/{name}")]
     public async Task<IActionResult> SearchAreaByName(string name)
     {
@@ -45,25 +57,32 @@ public class AreaController : ControllerBase
         return Ok(area);
     }
 
-
-    // Sua
+    /// <summary>
+    /// Cap nhat thong tin khu vuc.
+    /// </summary>
+    /// <param name="id">Id cua khu vuc.</param>
+    /// <param name="area">Thong tin khu vuc moi.</param>
+    /// <returns>Trang thai cap nhat.</returns>
+    [GroupRoleAuthorize(1)]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateArea(string id, [FromBody] Area area)
     {
-      
-
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var isUpdated = await _areaService.UpdateAreaAsync(id , area.AreaName);
+        var isUpdated = await _areaService.UpdateAreaAsync(id, area.AreaName);
         if (!isUpdated)
             return NotFound();
 
         return NoContent();
     }
 
-
-    // Xoa
+    /// <summary>
+    /// Xoa khu vuc theo id.
+    /// </summary>
+    /// <param name="id">Id cua khu vuc.</param>
+    /// <returns>Trang thai xoa.</returns>
+    [GroupRoleAuthorize(1)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteArea(string id)
     {
@@ -72,5 +91,30 @@ public class AreaController : ControllerBase
             return NotFound();
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Xem danh sach nguoi dung trong khu vuc.
+    /// </summary>
+    /// <param name="areaId">Id cua khu vuc.</param>
+    /// <returns>Danh sach nguoi dung trong khu vuc.</returns>
+    [GroupRoleAuthorize(1)]
+    [HttpGet("viewinarea/{areaId}")]
+    public async Task<ActionResult<List<User>>> ViewInArea(string areaId)
+    {
+        try
+        {
+            var usersInArea = await _areaService.ViewInArea(areaId);
+            if (usersInArea == null || usersInArea.Count == 0)
+            {
+                return NotFound("No users found in this area with 'sale' or 'distributor' role.");
+            }
+
+            return Ok(usersInArea);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Error retrieving users: {ex.Message}");
+        }
     }
 }

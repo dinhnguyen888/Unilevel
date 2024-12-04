@@ -14,4 +14,9 @@ namespace Unilevel.DTOs
         public int VisitCalendarId { get; set; }
       
     }
+    public class RateTaskDTO
+    {
+        public int JobId { get; set; }
+        public int TaskStar { get; set; }
+    }
 }

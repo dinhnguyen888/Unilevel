@@ -18,10 +18,6 @@
             Completed ,
             Closed
         }
-
-
-
-
         public int VisitCalendarId { get; set; }
         public VisitCalendar VisitCalendar { get; set; }
         public JobDetail JobDetail { get; set; }

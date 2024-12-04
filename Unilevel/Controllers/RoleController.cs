@@ -11,6 +11,14 @@ public class RolesController : ControllerBase
         _roleService = roleService;
     }
 
+    /// <summary>
+    /// Tao moi vai tro
+    /// </summary>
+    /// <param name="dto">Thong tin vai tro can tao</param>
+    /// <returns>Ket qua tao vai tro</returns>
+    /// <response code="200">Tao vai tro thanh cong</response>
+    /// <response code="400">Loi khi tao vai tro</response>
+    [GroupRoleAuthorize(1)]
     [HttpPost]
     public async Task<IActionResult> CreateRole(CreateRoleDTO dto)
     {
@@ -21,10 +29,15 @@ public class RolesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest("Khong the tao vai tro moi.");
         }
     }
 
+    /// <summary>
+    /// Lay danh sach tat ca cac vai tro
+    /// </summary>
+    /// <returns>Danh sach cac vai tro</returns>
+    /// <response code="200">Lay danh sach vai tro thanh cong</response>
     [HttpGet]
     public async Task<IActionResult> GetRoles()
     {
@@ -32,6 +45,14 @@ public class RolesController : ControllerBase
         return Ok(roles);
     }
 
+    /// <summary>
+    /// Cap nhat thong tin vai tro
+    /// </summary>
+    /// <param name="dto">Thong tin vai tro can cap nhat</param>
+    /// <returns>Ket qua cap nhat vai tro</returns>
+    /// <response code="200">Cap nhat vai tro thanh cong</response>
+    /// <response code="400">Loi khi cap nhat vai tro</response>
+    [GroupRoleAuthorize(1)]
     [HttpPut]
     public async Task<IActionResult> UpdateRole(UpdateRoleDTO dto)
     {
@@ -42,10 +63,18 @@ public class RolesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest("Khong the cap nhat vai tro.");
         }
     }
 
+    /// <summary>
+    /// Xoa vai tro theo ma dinh danh
+    /// </summary>
+    /// <param name="id">Ma dinh danh cua vai tro can xoa</param>
+    /// <returns>Ket qua xoa vai tro</returns>
+    /// <response code="200">Xoa vai tro thanh cong</response>
+    /// <response code="400">Loi khi xoa vai tro</response>
+    [GroupRoleAuthorize(1)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRole(string id)
     {
@@ -56,7 +85,7 @@ public class RolesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest("Khong the xoa vai tro.");
         }
     }
 }

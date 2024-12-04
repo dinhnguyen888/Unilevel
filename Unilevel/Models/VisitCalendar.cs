@@ -17,10 +17,13 @@ namespace Unilevel.Models
 
         public string DistributorId { get; set; }
         public Distributor Distributor { get; set; }
-        
-        
-        public string? VisitCalendarStatus { get; set; }
-
+        public Status? VisitCalendarStatus { get; set; } = Status.notVisited; //isVisited , NotVisited, Abort
+        public enum Status
+        {
+            isVisited,
+            notVisited,
+            Abort
+        }
         public ICollection<ImplementationDate> ImplementationDates { get; set; } = new List<ImplementationDate>();
 
     }

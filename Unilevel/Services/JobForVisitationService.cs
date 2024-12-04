@@ -11,7 +11,7 @@ namespace Unilevel.Services
     public class JobForVisitationService
     {
         private readonly AppDbContext _appDbContext;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration; 
         private readonly IHubContext<CommentHub> _commentHubContext;
 
         public JobForVisitationService(AppDbContext appDbContext, IConfiguration configuration, IHubContext<CommentHub> commentHubContext)
@@ -21,7 +21,7 @@ namespace Unilevel.Services
             _commentHubContext = commentHubContext; // Initialize the HubContext
         }
 
-        // Lấy danh sách công việc theo VisitCalendarId
+        // Lay danh sach cong viec theo Id 
         public List<JobForVisitationDTO> GetJobsByVisitCalendarId(int visitCalendarId)
         {
             return _appDbContext.JobForVisitation
@@ -39,7 +39,7 @@ namespace Unilevel.Services
                 .ToList();
         }
 
-        // Tạo một công việc mới
+        // Tao cong viec moi 
         public string CreateJob(JobForVisitationDTO jobDto, string userId)
         {
             if (userId.IsNullOrEmpty())
@@ -57,25 +57,25 @@ namespace Unilevel.Services
                 VisitCalendarId = jobDto.VisitCalendarId
             };
 
-            // Thêm và lưu newJob trước
+            // Luu job vao truoc
             _appDbContext.JobForVisitation.Add(newJob);
-            _appDbContext.SaveChanges(); // Lưu để lấy giá trị Id của newJob
+            _appDbContext.SaveChanges(); 
 
-            // Sử dụng newJob.Id để tạo JobDetail
+            // dung Id cua newjob de tao Jobdetail
             var jobDetail = new JobDetail
             {
                 Id = newJob.Id,
             };
             _appDbContext.JobDetail.Add(jobDetail);
 
-            // Lưu lại thay đổi
+            // Luu lai
             _appDbContext.SaveChanges();
 
             return "Thêm Công việc thành công";
         }
 
 
-        // Lấy công việc của chính mình dựa vào WorkingPerson
+        // Lay cong viec cua ban than
         public List<JobForVisitationDTO> GetJobsByWorkingPerson(string workingPerson)
         {
             return _appDbContext.JobForVisitation
@@ -114,7 +114,6 @@ namespace Unilevel.Services
 
 
         // tai len hinh anh
-
         public async Task<string> UploadImageAsync(int jobId, IFormFile file, string uploadPerson)
         {
             
@@ -130,7 +129,7 @@ namespace Unilevel.Services
             }
 
             // tao duong dan luu file 
-            var folderPath = Path.Combine("wwwroot", "uploads", "images");
+            var folderPath = Path.Combine("wwwroot", "uploads", "report");
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
@@ -146,7 +145,7 @@ namespace Unilevel.Services
             }
 
             // Luu duong dan file vao csdl
-            var fileUrl = $"/uploads/images/{fileName}";
+            var fileUrl = $"/uploads/report/{fileName}";
             if (uploadPerson == "CreatorReporter")
             {
                 jobDetail.LinkFileForCreatorReporter = fileUrl;
@@ -165,40 +164,41 @@ namespace Unilevel.Services
         }
 
 
-        //dong job
+        // Dong job
         public async Task<string> changeJobStatus(int jobId, string jobStatus)
         {
-            // Tìm công việc theo jobId
+            // Check tham so
             var job = _appDbContext.JobForVisitation.FirstOrDefault(j => j.Id == jobId);
 
-            // Kiểm tra nếu công việc không tồn tại
             if (job == null)
             {
-                return "Công việc không tồn tại.";
+                return "Cong viec khong ton tai.";
             }
 
-            // Chuyển đổi jobStatus từ string sang enum JobStatuses
+            // Chuyen doi tu string sang enum
             if (Enum.TryParse(jobStatus, out JobForVisitation.JobStatuses status))
             {
                 job.JobStatus = status; 
             }
             else
             {
-                return "Trạng thái công việc không hợp lệ.";
+                return "Trang thai khong hop le.";
             }
 
-            // Lưu thay đổi vào cơ sở dữ liệu
+            // Luu
             await _appDbContext.SaveChangesAsync();
 
-            return "Trạng thái công việc đã được thay đổi thành công.";
+            return "Thay doi thanh cong.";
         }
 
+
+        // Gui binh luan
         public async Task SendComment(string userId, CommentForJobDTO commentForJobDTO)
         {
             var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
-                throw new Exception("UserId not found");
+                throw new Exception("UserId khong hop le");
             }
 
             var Comment = new CommentForJob
@@ -208,9 +208,33 @@ namespace Unilevel.Services
                 JobId = commentForJobDTO.JobId,
 
             };
-            await _commentHubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, commentForJobDTO.Comment);
+            await _commentHubContext.Clients.All.SendAsync("ReceiveComment", user.UserName, commentForJobDTO.Comment);
         }
 
+       // Danh gia task
+        public async Task<string> RateTaskAsync(int jobId, int taskStar,int miniumStar, int maxStar)
+        {
+
+            // Check tham so
+            if (taskStar < miniumStar || taskStar > maxStar)
+            {
+                return "Diem danh gia khong hop le.";
+            }
+
+            var jobDetail = await _appDbContext.JobDetail.FirstOrDefaultAsync(j => j.Id == jobId);
+            if (jobDetail == null)
+            {
+                return "jobId khong hop le.";
+            }
+
+            // Cap nhat taskstar
+            jobDetail.TaskStar = taskStar;
+
+            // Luu thay doi
+            await _appDbContext.SaveChangesAsync();
+
+            return $"Danh gia thanh cong voi {taskStar} sao.";
+        }
 
 
     }

@@ -10,7 +10,7 @@ public class PermissionService
         _dbContext = dbContext;
     }
 
-    // Lấy danh sách tất cả các permission
+    // Doc
     public async Task<List<PermissionDTO>> GetAllPermissionsAsync()
     {
         return await _dbContext.Permission
@@ -21,7 +21,8 @@ public class PermissionService
             }).ToListAsync();
     }
 
-    // Gán permissions cho role
+
+    // Gan Permission cho Role
     public async Task<string> AssignPermissionsToRoleAsync(AssignPermissionDTO dto)
     {
         var role = await _dbContext.Roles
@@ -30,7 +31,7 @@ public class PermissionService
 
         if (role == null)
         {
-            throw new Exception("Role not found");
+            throw new Exception("Role khong hop le");
         }
 
         var permissions = await _dbContext.Permission
@@ -39,13 +40,12 @@ public class PermissionService
 
         if (permissions.Count == 0)
         {
-            throw new Exception("No valid permissions found");
+            throw new Exception("Role khong tim thay");
         }
 
-        // Xóa các permissions hiện tại (nếu cần cập nhật lại)
         role.RolePermissions.Clear();
 
-        // Thêm các permissions mới
+        // Them permission moi
         foreach (var permission in permissions)
         {
             role.RolePermissions.Add(new RolePermission
@@ -57,6 +57,6 @@ public class PermissionService
 
         await _dbContext.SaveChangesAsync();
 
-        return "Permissions assigned successfully";
+        return "Role duoc gan thanh cong";
     }
 }

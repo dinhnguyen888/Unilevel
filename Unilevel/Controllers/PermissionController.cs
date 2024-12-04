@@ -11,6 +11,12 @@ public class PermissionsController : ControllerBase
         _permissionService = permissionService;
     }
 
+    /// <summary>
+    /// Lay danh sach tat ca cac quyen
+    /// </summary>
+    /// <returns>Danh sach cac quyen</returns>
+    /// <response code="200">Lay danh sach quyen thanh cong</response>
+    [GroupRoleAuthorize(1)]
     [HttpGet]
     public async Task<IActionResult> GetAllPermissions()
     {
@@ -18,6 +24,14 @@ public class PermissionsController : ControllerBase
         return Ok(permissions);
     }
 
+    /// <summary>
+    /// Gan quyen cho mot vai tro
+    /// </summary>
+    /// <param name="dto">Thong tin phan quyen cho vai tro</param>
+    /// <returns>Ket qua gan quyen</returns>
+    /// <response code="200">Gan quyen cho vai tro thanh cong</response>
+    /// <response code="400">Loi khi gan quyen cho vai tro</response>
+    [GroupRoleAuthorize(1)]
     [HttpPost("assign-for-role")]
     public async Task<IActionResult> AssignPermissionsToRole(AssignPermissionDTO dto)
     {
@@ -28,7 +42,7 @@ public class PermissionsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest("Khong the gan quyen cho vai tro.");
         }
     }
 }

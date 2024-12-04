@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,13 +28,14 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.18" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Middlewares\" />
-    <Folder Include="wwwroot\uploads\images\" />
+    <Folder Include="wwwroot\uploads\media\" />
+    <Folder Include="wwwroot\uploads\report\" />
   </ItemGroup>
 
 </Project>

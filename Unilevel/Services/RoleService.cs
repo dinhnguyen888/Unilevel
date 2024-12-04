@@ -10,7 +10,9 @@ public class RoleService
         _dbContext = dbContext;
     }
 
-    // Create Role
+
+
+    // Tao
     public async Task<string> CreateRoleAsync(CreateRoleDTO dto)
     {
         var groupRole = await _dbContext.GroupRole.FindAsync(dto.GroupRoleId);
@@ -33,7 +35,8 @@ public class RoleService
         return "Role created successfully";
     }
 
-    // Read Roles
+
+    // Doc
     public async Task<List<RoleDTO>> GetRolesAsync()
     {
         return await _dbContext.Roles
@@ -46,7 +49,7 @@ public class RoleService
             }).ToListAsync();
     }
 
-    // Update Role
+    // Sua
     public async Task<string> UpdateRoleAsync(UpdateRoleDTO dto)
     {
         var role = await _dbContext.Roles.FindAsync(dto.Id);
@@ -70,7 +73,7 @@ public class RoleService
         return "Role updated successfully";
     }
 
-    // Delete Role
+    // Xoa
     public async Task<string> DeleteRoleAsync(string id)
     {
         var role = await _dbContext.Roles.FindAsync(id);

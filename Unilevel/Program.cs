@@ -12,13 +12,16 @@ using Unilevel.Controllers;
 using Unilevel.Models;
 using Unilevel.Services;
 using Unilevel.Hubs;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure DbContext with SQL Server
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString)
+    );
 
 builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -37,6 +40,15 @@ builder.Services.AddScoped<JobForVisitationService>();
 builder.Services.AddScoped<DistributorService>();
 builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<PermissionService>();
+builder.Services.AddScoped<SaleStaffService>();
+builder.Services.AddScoped<MediaService>();
+builder.Services.AddScoped<ArticleService>();
+builder.Services.AddScoped<SurveyService>();
+builder.Services.AddScoped<SurveyRequestService>();
+builder.Services.AddScoped<SurveyResponseService>();
+builder.Services.AddScoped<NotificationService>();
+
+
 
 builder.Services.AddSignalR();
 builder.Services.Configure<FormOptions>(options =>
@@ -100,16 +112,29 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.OperationFilter<SwaggerFileOperationFilter>();
-    options.OperationFilter<AddFileUploadOperationFilter>();
+    options.EnableAnnotations();
+
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Unilevel API",
+        Version = "v1",
+        Description = "API doc"
+    });
+
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Config HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Unilevel API v1");
+        options.RoutePrefix = "swagger"; 
+    });
 }
 
 using (var scope = app.Services.CreateScope())
@@ -118,6 +143,14 @@ using (var scope = app.Services.CreateScope())
     if (dbContext.Database.CanConnect())
     {
         Console.WriteLine("Database connection OK.");
+        var actionDescriptorProvider = scope.ServiceProvider.GetRequiredService<IActionDescriptorCollectionProvider>();
+
+        // Seed permissions vao database
+        var seeder = new PermissionSeeder(dbContext, actionDescriptorProvider);
+        seeder.SeedPermissions();
+
+        // Seed admin user
+        await AdministratorInitSeeder.SeedAdminUser(scope.ServiceProvider);
     }
     else
     {
@@ -127,10 +160,11 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 
-// Add Authentication and Authorization Middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<CommentHub>("/yourHub");
+app.MapHub<CommentHub>("/commentHub");
+app.MapHub<NotificationHub>("/notificationHub");
 app.Run();
+

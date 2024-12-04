@@ -21,6 +21,7 @@ namespace Unilevel.Services
             _configuration = configuration;
         }
 
+
         // Liet ke tat ca nguoi dung
         public async Task<List<Account>> ListAllUsersAsync()
         {
@@ -43,6 +44,7 @@ namespace Unilevel.Services
 
             return users;
         }
+
 
         // tao nguoi dung moi
         public async Task<IdentityResult> CreateUserAsync(Account account)
@@ -100,6 +102,7 @@ namespace Unilevel.Services
         //    };
         //}
 
+
         // Cap nhat thong tin nguoi dung
         public async Task<IdentityResult> UpdateUserAsync(Guid userId, Account account)
         {
@@ -136,6 +139,7 @@ namespace Unilevel.Services
 
             return result;
         }
+
 
         // Xoa nguoi dung 
         public async Task<IdentityResult> DeleteUserAsync(string userId)
@@ -180,7 +184,6 @@ namespace Unilevel.Services
             var passwordSetting = _configuration.GetSection("PasswordDefault");
             string newPassword = passwordSetting["Pass"];
             var user = await _userManager.FindByIdAsync(userId);
-            //if (user == null) throw new ArgumentException("User not found.");
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             return await _userManager.ResetPasswordAsync(user, token, newPassword);
@@ -195,11 +198,13 @@ namespace Unilevel.Services
                 return false;
             }
 
-            // Kiểm tra xem user có tồn tại với UserName là reporterUserName không
+            // Check tham so dau vao
             var reporterUser = await _userManager.FindByNameAsync(reporterUserName);
             return reporterUser != null;
         }
 
+
+        //Ham import user bang excel
         public async Task<(int added, int updated, int errors, List<string> errorLogs)> ImportUsersFromExcelAsync(Stream fileStream)
         {
             int added = 0, updated = 0, errors = 0;
@@ -207,10 +212,10 @@ namespace Unilevel.Services
 
             using (var workbook = new XLWorkbook(fileStream))
             {
-                var worksheet = workbook.Worksheet(1); // Assuming data is in the first sheet
+                var worksheet = workbook.Worksheet(1);
                 var rows = worksheet.RowsUsed();
 
-                foreach (var row in rows.Skip(1)) // Bỏ qua hàng tiêu đề
+                foreach (var row in rows.Skip(1)) // Bo dong dau tien ( dong tieu de )
                 {
                     try
                     {
@@ -222,25 +227,25 @@ namespace Unilevel.Services
                         string role = row.Cell(7).GetValue<string>();
 
                         if (!DateTime.TryParse(row.Cell(6).GetValue<string>(), out var joinDate))
-                            throw new Exception("Invalid date format in JoinDate");
+                            throw new Exception("Dinh dang ngay thang khong dung");
 
                         if (!bool.TryParse(row.Cell(8).GetValue<string>(), out var isActive))
-                            throw new Exception("Invalid boolean format in IsActive");
+                            throw new Exception("Dinh danh boolean khong dung");
 
-                        // Kiểm tra role trước
+                        // Check Role 
                         if (!string.IsNullOrEmpty(role))
                         {
-                            var roleExists = await _roleManager.RoleExistsAsync(role); // Kiểm tra role có tồn tại không
+                            var roleExists = await _roleManager.RoleExistsAsync(role); //Check role
                             if (!roleExists)
                                 throw new Exception($"Role {role} does not exist.");
                         }
 
-                        // Tìm người dùng
+                        // Tim user
                         var existingUser = await _userManager.FindByNameAsync(userName);
 
                         if (existingUser == null)
                         {
-                            // Tạo người dùng mới
+                            // Tao nguoi dung moi
                             var newUser = new User
                             {
                                 UserName = userName,
@@ -252,12 +257,14 @@ namespace Unilevel.Services
                                 IsActive = isActive
                             };
 
-                            var result = await _userManager.CreateAsync(newUser, "Abc123@"); // Mật khẩu mặc định
+                            var passwordSetting = _configuration.GetSection("PasswordDefault");
+                            string newPassword = passwordSetting["Pass"];
+                            var result = await _userManager.CreateAsync(newUser, newPassword); 
 
                             if (!result.Succeeded)
                                 throw new Exception($"Failed to create user '{userName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-                            // Gán role nếu có
+                            // Gan Role
                             if (!string.IsNullOrEmpty(role))
                             {
                                 var roleResult = await _userManager.AddToRoleAsync(newUser, role);
@@ -269,7 +276,7 @@ namespace Unilevel.Services
                         }
                         else
                         {
-                            // Cập nhật người dùng hiện có
+                            // Cap nhat nguoi dung hien co
                             existingUser.Email = email;
                             existingUser.PhoneNumber = phoneNumber;
                             existingUser.Address = address;
@@ -286,7 +293,7 @@ namespace Unilevel.Services
                     }
                     catch (Exception ex)
                     {
-                        // Đảm bảo bỏ qua hoàn toàn hàng hiện tại nếu có lỗi
+                        // Bo qua hang hien tai neu co loi
                         errors++;
                         errorLogs.Add($"Error processing row {row.RowNumber()}: {ex.Message}");
                     }
@@ -296,6 +303,8 @@ namespace Unilevel.Services
             return (added, updated, errors, errorLogs);
         }
 
+
+        // Ham convert tu csv sang excel
         public Stream ConvertCsvToExcel(Stream csvStream)
         {
             using (var reader = new StreamReader(csvStream))
@@ -322,23 +331,20 @@ namespace Unilevel.Services
 
                     var excelStream = new MemoryStream();
                     workbook.SaveAs(excelStream);
-                    excelStream.Position = 0; // Reset stream position
+                    excelStream.Position = 0; 
                     return excelStream;
                 }
             }
         }
 
 
-
-
-
+        // Ham xuat excel
         public async Task<byte[]> ExportUsersToExcelAsync()
         {
             using (var workbook = new XLWorkbook())
             {
                 var worksheet = workbook.Worksheets.Add("Users");
-
-                // Add headers
+                
                 worksheet.Cell(1, 1).Value = "UserName";
                 worksheet.Cell(1, 2).Value = "Email";
                 worksheet.Cell(1, 3).Value = "PhoneNumber";
@@ -348,7 +354,6 @@ namespace Unilevel.Services
                 worksheet.Cell(1, 7).Value = "Role";
                 worksheet.Cell(1, 8).Value = "IsActive";
 
-                // Add user data
                 var users = await _userManager.Users.ToListAsync();
                 int row = 2;
 

@@ -67,10 +67,15 @@ public class AuthService
             .Distinct()
             .ToListAsync();
         var rolesPermissions = await _appDbContext.RolePermissions
-        .Where(up => roles.Contains(up.Role.Name))
-        .Select(up => up.Permission.PermissionName) 
-        .Distinct()
-        .ToListAsync();
+            .Where(up => roles.Contains(up.Role.Name))
+            .Select(up => up.Permission.PermissionName) 
+            .Distinct()
+            .ToListAsync();
+
+        var areaId = await _appDbContext.Users
+            .Where(u => u.Id == user.Id) 
+            .Select(u => u.AreaId)     
+            .FirstOrDefaultAsync();
 
 
         if (groupRoleId == null || !groupRoleId.Any())
@@ -89,7 +94,7 @@ public class AuthService
             new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
-        //claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role))); [GroupRoleAuthorize(1)]
+        claims.Add(new Claim("AreaId", user.AreaId ?? "System"));
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
         claims.AddRange(groupRoleId.Select(gr => new Claim("GroupRole", gr.ToString())));
         claims.AddRange(rolesPermissions.Select(permission => new Claim("Permission", permission)));

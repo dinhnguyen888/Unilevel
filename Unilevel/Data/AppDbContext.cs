@@ -24,22 +24,35 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
     public DbSet<JobDetail> JobDetail { get; set; }
     public DbSet<CommentForJob> CommentForJob { get; set; }
     public DbSet<SaleDistributor> SaleDistributor { get; set; }
+    public DbSet<Media> Media { get; set; }
+    public DbSet<Article> Articles { get; set; }
+    public DbSet<Survey> Surveys { get; set; }
+    public DbSet<Question> Questions {  get; set; }
+    public DbSet<Answer> Answers { get; set; }
+    public DbSet<SurveyRequest> SurveyRequest { get; set; }
+    public DbSet<SurveyReceiver> SurveyReceiver { get; set; }
+    public DbSet<SurveyResponse> SurveyResponse { get; set; }
+    public DbSet<Notification> Notification { get; set; }
+    public DbSet<NotifyReceiver> NotifyReceiver { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
         builder.Entity<SaleDistributor>()
             .ToTable("SaleDistributors");
+
         builder.Entity<Distributor>()
             .ToTable("Distributors");
+
+        builder.Entity<SaleStaff>()
+            .ToTable("SaleStaff");
 
         builder.Entity<User>()
             .HasOne(u => u.Areas)
             .WithMany()
             .HasForeignKey(u => u.AreaId)
            ;
-        
-
+      
         // Configure UserPermission composite key
         builder.Entity<RolePermission>()
             .HasKey(up => new { up.RoleId, up.PermissionId });
@@ -79,38 +92,16 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
             .WithMany()
             .HasForeignKey(v => v.VisitCalendarId);
 
-        //builder.Entity<VisitCalendarDistributor>()
-        //    .HasKey(vcd  => new {vcd.VisitCalendarId ,vcd.DistributorId});
-
-        //builder.Entity<VisitCalendarDistributor>()
-        //    .HasOne(vcd => vcd.Distributor)
-        //    .WithMany()
-        //    .HasForeignKey(vcd => vcd.DistributorId);
-
-        //builder.Entity<VisitCalendarDistributor>()
-        //    .HasOne(vcd => vcd.VisitCalendar)
-        //    .WithMany()
-        //    .HasForeignKey(vcd => vcd.VisitCalendarId);
-
         builder.Entity<VisitCalendar>()
             .HasOne(v => v.Distributor)
             .WithMany()
             .HasForeignKey(v => v.DistributorId);
 
-
-
         builder.Entity<JobForVisitation>()
             .HasOne(j => j.VisitCalendar)
             .WithMany()
-            .HasForeignKey(j => j.VisitCalendarId);
-
-
-        builder.Entity<SaleStaff>()
-            .ToTable("SaleStaff")  // Tạo bảng riêng cho SaleStaff
-            .HasOne(s => s.Superior)
-            .WithMany(s => s.Inferiors)
-            .HasForeignKey(s => s.SuperiorId)
-            .OnDelete(DeleteBehavior.Restrict); // Tránh xóa cascade
+            .HasForeignKey(j => j.VisitCalendarId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<SaleDistributor>()
             .HasKey(sd => new {sd.DistributorId ,sd.SaleStaffId } );
@@ -147,9 +138,9 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
 
         //de y
         builder.Entity<ImplementationDate>()
-        .HasOne(i => i.VisitCalendar)  // Mỗi ImplementationDate có một VisitCalendar
-        .WithMany(vc => vc.ImplementationDates)  // Mỗi VisitCalendar có nhiều ImplementationDate
-        .HasForeignKey(i => i.VisitCalendarId)  // Đặt khóa ngoại cho ImplementationDate
+        .HasOne(i => i.VisitCalendar) 
+        .WithMany(vc => vc.ImplementationDates)  
+        .HasForeignKey(i => i.VisitCalendarId)  
         .OnDelete(DeleteBehavior.Cascade);
 
        builder.Entity<JobForVisitation>()
@@ -163,7 +154,48 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
        .WithMany(j => j.CommentForJob)
        .HasForeignKey(c => c.JobId);
 
-       
+        builder.Entity<Survey>()
+        .HasMany(s => s.Questions)
+        .WithOne(q => q.Survey)
+        .HasForeignKey(q => q.SurveyId)
+        .OnDelete(DeleteBehavior.Cascade); 
+
+        builder.Entity<Question>()
+            .HasMany(q => q.Answers)
+            .WithOne(a => a.Question)
+            .HasForeignKey(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<SurveyRequest>()
+               .HasOne(s => s.Survey)
+               .WithMany()
+               .HasForeignKey(s => s.SurveyId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<SurveyRequest>()
+               .HasMany(sr => sr.SurveyReceiver)
+               .WithOne()
+               .HasForeignKey(sr => sr.SurveyRequestId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<SurveyReceiver>()
+            .HasKey(s => new { s.SurveyRequestId , s.UserId, s.SurveyId });
+
+        builder.Entity<SurveyResponse>()
+                  .HasOne<Survey>()
+                  .WithMany()
+                  .HasForeignKey(sr => sr.SurveyId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<NotifyReceiver>()
+                .HasKey(nr => new { nr.UserId, nr.NotificationId });
+
+        builder.Entity<NotifyReceiver>()
+            .HasOne(nr => nr.Notification)
+            .WithMany(n => n.NotifyReceiver)
+            .HasForeignKey(nr => nr.NotificationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
 
         // Seeding GroupRole data
         builder.Entity<GroupRole>().HasData(

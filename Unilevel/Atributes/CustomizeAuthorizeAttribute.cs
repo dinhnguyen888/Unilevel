@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 public class CustomAuthorizeAttribute : AuthorizeAttribute, IAuthorizationFilter
 {
-    private readonly string _requiredPermission;
+    public readonly string _requiredPermission;
     private readonly int _requiredGroupRoleId;
 
     // Constructor nhận cả quyền và group role
