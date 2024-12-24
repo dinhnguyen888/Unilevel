@@ -39,7 +39,7 @@ namespace Unilevel.Services
                                             AreaId  = user.AreaId,
                                             JoinDate = user.JoinDate,
                                             IsActive = user.IsActive,
-                                            Reporter = user.Reporter,
+                                            
                                         }).ToListAsync();
 
             return users;
@@ -49,38 +49,68 @@ namespace Unilevel.Services
         // tao nguoi dung moi
         public async Task<IdentityResult> CreateUserAsync(Account account)
         {
-
-            var user = new User
+            using var transaction = await _appDbContext.Database.BeginTransactionAsync();
+            try
             {
-                UserName = account.UserName,
-                Email = account.Email,
-                PhoneNumber = account.PhoneNumber,
-                Address = account.Address,
-                AreaId = account.AreaId,
-                JoinDate = account.JoinDate,
-                IsActive = account.IsActive,
-                Reporter = account.Reporter ?? null,
-            };
-
-            
-            var result = await _userManager.CreateAsync(user, account.Password); 
-            if (result.Succeeded)
-            {
-                
-                var role = account.Role ; 
-                if (await _roleManager.RoleExistsAsync(role))
+                var user = new User
                 {
-                    await _userManager.AddToRoleAsync(user, role);
-                }
-                else
-                {
+                    UserName = account.UserName,
+                    Email = account.Email,
+                    PhoneNumber = account.PhoneNumber,
+                    Address = account.Address,
+                    AreaId = account.AreaId,
+                    JoinDate = account.JoinDate,
+                    IsActive = account.IsActive,
                    
-                    throw new ArgumentException($"Role '{role}' does not exist.");
-                }
-            }
+                };
 
-            return result;
+                var result = await _userManager.CreateAsync(user, account.Password);
+                if (!result.Succeeded)
+                    throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+                var role = account.Role;
+                if (!await _roleManager.RoleExistsAsync(role))
+                    throw new ArgumentException($"Role '{role}' does not exist.");
+
+                var roleEntity = await _roleManager.FindByNameAsync(role);
+                if (roleEntity == null)
+                    throw new ArgumentException("Invalid role.");
+
+                // Check GroupRoleId
+                if (roleEntity.GroupRoleId == 2)
+                {
+                    // Add user to SaleStaff table
+                    var saleStaff = new SaleStaff
+                    {
+                        UserId = user.Id,
+                        ManagerId = account.ManagerForSaleStaffId
+                    };
+                    _appDbContext.SaleStaff.Add(saleStaff);
+                }
+                else if (roleEntity.GroupRoleId == 3)
+                {
+                    var distributor = new Distributor
+                    {
+                        UserId = user.Id,
+                        SaleManagementId = account.ReporterForDistributorId ?? throw new Exception("reporterForDistributorId khong duoc de trong neu muon tao distributor"), 
+                        
+                    };
+                    _appDbContext.Distributor.Add(distributor);
+                }
+
+                await _userManager.AddToRoleAsync(user, role);
+                await _appDbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
+
 
 
         //doc thong tin nguoi dung qua Id
@@ -106,49 +136,151 @@ namespace Unilevel.Services
         // Cap nhat thong tin nguoi dung
         public async Task<IdentityResult> UpdateUserAsync(Guid userId, Account account)
         {
-
-            string UserIdStringConvert = userId.ToString();
-            var user = await _userManager.FindByIdAsync(UserIdStringConvert);
-            if (user == null) throw new ArgumentException("User not found.");
-
-            if (!await IsValidReporterAsync(account.Reporter))
+            using var transaction = await _appDbContext.Database.BeginTransactionAsync();
+            try
             {
-                throw new ArgumentException("Invalid Reporter: User does not exist.");
-            }
+                string userIdString = userId.ToString();
+                var user = await _userManager.FindByIdAsync(userIdString);
+                if (user == null) throw new ArgumentException("User not found.");
 
-            user.UserName = account.UserName;
-            user.PhoneNumber = account.PhoneNumber;
-            user.Email = account.Email;
-            user.Address = account.Address;
-            user.AreaId = account.AreaId;
-            user.JoinDate = account.JoinDate;
-            user.IsActive = account.IsActive;
-            user.Reporter = account.Reporter;
+                
 
-            var result = await _userManager.UpdateAsync(user);
+                user.UserName = account.UserName;
+                user.PhoneNumber = account.PhoneNumber;
+                user.Email = account.Email;
+                user.Address = account.Address;
+                user.AreaId = account.AreaId;
+                user.JoinDate = account.JoinDate;
+                user.IsActive = account.IsActive;
 
-            if (result.Succeeded && account.Role != null)
-            {
-                var currentRoles = await _userManager.GetRolesAsync(user);
-                if (!currentRoles.Contains(account.Role))
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                    throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+                if (!string.IsNullOrEmpty(account.Role))
                 {
-                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                    await _userManager.AddToRoleAsync(user, account.Role);
-                }
-            }
+                    var currentRoles = await _userManager.GetRolesAsync(user);
+                    if (!currentRoles.Contains(account.Role))
+                    {
+                        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                        await _userManager.AddToRoleAsync(user, account.Role);
+                    }
 
-            return result;
+                    // Check GroupRoleId of the new role
+                    var roleEntity = await _roleManager.FindByNameAsync(account.Role);
+                    if (roleEntity?.GroupRoleId == 2)
+                    {
+                        if (!_appDbContext.SaleStaff.Any(ss => ss.UserId == user.Id))
+                        {
+                            var saleStaff = new SaleStaff
+                            {
+                                UserId = user.Id,
+                                ManagerId = account.ManagerForSaleStaffId,
+                            
+                            };
+                            _appDbContext.SaleStaff.Add(saleStaff);
+                        }
+                    }
+                    else if (roleEntity?.GroupRoleId == 3)
+                    {
+                        if (!_appDbContext.Distributor.Any(ss => ss.UserId == user.Id))
+                        {
+                            var distributor = new Distributor
+                            {
+                                UserId = user.Id,
+                                SaleManagementId = account.ReporterForDistributorId,
+
+                            };
+                            _appDbContext.Distributor.Add(distributor);
+                        }
+                    }
+                    else
+                    {
+                        // Remove user from SaleStaff if no longer in GroupRoleId = 2
+                        var saleStaff = _appDbContext.SaleStaff.FirstOrDefault(ss => ss.UserId == user.Id);
+                        if (saleStaff != null)
+                        {
+                            transaction.RollbackAsync();
+                        }
+                    }
+                }
+
+                await _appDbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
+
 
 
         // Xoa nguoi dung 
         public async Task<IdentityResult> DeleteUserAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) throw new ArgumentException("User not found.");
+            using var transaction = await _appDbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new ArgumentException("User not found.");
 
-            return await _userManager.DeleteAsync(user);
+                var roles = await _userManager.GetRolesAsync(user);
+
+                foreach (var roleName in roles)
+                {
+                    var role = await _roleManager.FindByNameAsync(roleName);
+                    if (role != null)
+                    {
+                        switch (role.GroupRoleId)
+                        {
+                            //case 3 la nhom nguoi dung thuoc distributor, case 2 la nhom nguoi dung thuoc Sale
+                            case 3:
+                                var distributor = await _appDbContext.Distributor.FirstOrDefaultAsync(d => d.UserId == userId);
+                                if (distributor != null)
+                                {
+                                    _appDbContext.Distributor.Remove(distributor);
+                                }
+                                break;
+
+                            case 2:
+                                var saleStaff = await _appDbContext.SaleStaff.FirstOrDefaultAsync(s => s.UserId == userId);
+                                if (saleStaff != null)
+                                {
+                                    _appDbContext.SaleStaff.Remove(saleStaff);
+                                }
+                                break;
+
+                            default:
+                                break; 
+                        }
+                    }
+                }
+
+                await _appDbContext.SaveChangesAsync();
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return result;
+                }
+
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                // Rollback transaction neu thay loi
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
 
         // Tim kiem nguoi dung theo thong tin 
         public async Task<List<Account>> SearchUsersAsync(string searchTerm)
@@ -190,18 +322,7 @@ namespace Unilevel.Services
         }
 
 
-        //check xem reportter co trong User khong
-        private async Task<bool> IsValidReporterAsync(string reporterUserName)
-        {
-            if (string.IsNullOrEmpty(reporterUserName))
-            {
-                return false;
-            }
-
-            // Check tham so dau vao
-            var reporterUser = await _userManager.FindByNameAsync(reporterUserName);
-            return reporterUser != null;
-        }
+      
 
 
         //Ham import user bang excel
@@ -210,98 +331,124 @@ namespace Unilevel.Services
             int added = 0, updated = 0, errors = 0;
             var errorLogs = new List<string>();
 
-            using (var workbook = new XLWorkbook(fileStream))
+            using (var transaction = await _appDbContext.Database.BeginTransactionAsync())
             {
-                var worksheet = workbook.Worksheet(1);
-                var rows = worksheet.RowsUsed();
-
-                foreach (var row in rows.Skip(1)) // Bo dong dau tien ( dong tieu de )
+                try
                 {
-                    try
+                    using (var workbook = new XLWorkbook(fileStream))
                     {
-                        string userName = row.Cell(1).GetValue<string>();
-                        string email = row.Cell(2).GetValue<string>();
-                        string phoneNumber = row.Cell(3).GetValue<string>();
-                        string address = row.Cell(4).GetValue<string>();
-                        string area = row.Cell(5).GetValue<string>();
-                        string role = row.Cell(7).GetValue<string>();
+                        var worksheet = workbook.Worksheet(1);
+                        var rows = worksheet.RowsUsed();
 
-                        if (!DateTime.TryParse(row.Cell(6).GetValue<string>(), out var joinDate))
-                            throw new Exception("Dinh dang ngay thang khong dung");
-
-                        if (!bool.TryParse(row.Cell(8).GetValue<string>(), out var isActive))
-                            throw new Exception("Dinh danh boolean khong dung");
-
-                        // Check Role 
-                        if (!string.IsNullOrEmpty(role))
+                        foreach (var row in rows.Skip(1)) // Bỏ dòng đầu tiên (tiêu đề)
                         {
-                            var roleExists = await _roleManager.RoleExistsAsync(role); //Check role
-                            if (!roleExists)
-                                throw new Exception($"Role {role} does not exist.");
-                        }
-
-                        // Tim user
-                        var existingUser = await _userManager.FindByNameAsync(userName);
-
-                        if (existingUser == null)
-                        {
-                            // Tao nguoi dung moi
-                            var newUser = new User
+                            try
                             {
-                                UserName = userName,
-                                Email = email,
-                                PhoneNumber = phoneNumber,
-                                Address = address,
-                                AreaId = area,
-                                JoinDate = joinDate,
-                                IsActive = isActive
-                            };
+                                string userName = row.Cell(1).GetValue<string>();
+                                string email = row.Cell(2).GetValue<string>();
+                                string phoneNumber = row.Cell(3).GetValue<string>();
+                                string address = row.Cell(4).GetValue<string>();
+                                string area = row.Cell(5).GetValue<string>();
+                                string role = row.Cell(7).GetValue<string>();
+                                string reporter = row.Cell(9).GetValue<string>();
+                                string manager = row.Cell(10).GetValue<string>();
+                            
 
-                            var passwordSetting = _configuration.GetSection("PasswordDefault");
-                            string newPassword = passwordSetting["Pass"];
-                            var result = await _userManager.CreateAsync(newUser, newPassword); 
+                                if (!DateTime.TryParse(row.Cell(6).GetValue<string>(), out var joinDate))
+                                    throw new Exception("Invalid date format");
 
-                            if (!result.Succeeded)
-                                throw new Exception($"Failed to create user '{userName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                                if (!bool.TryParse(row.Cell(8).GetValue<string>(), out var isActive))
+                                    throw new Exception("Invalid boolean format");
 
-                            // Gan Role
-                            if (!string.IsNullOrEmpty(role))
-                            {
-                                var roleResult = await _userManager.AddToRoleAsync(newUser, role);
-                                if (!roleResult.Succeeded)
-                                    throw new Exception($"Failed to assign role {role} to user {userName}");
+                                var existingUser = await _userManager.FindByNameAsync(userName);
+
+                                if (existingUser == null)
+                                {
+                                    var newUser = new User
+                                    {
+                                        UserName = userName,
+                                        Email = email,
+                                        PhoneNumber = phoneNumber,
+                                        Address = address,
+                                        AreaId = area,
+                                        JoinDate = joinDate,
+                                        IsActive = isActive
+                                    };
+
+                                    var passwordSetting = _configuration.GetSection("PasswordDefault");
+                                    string newPassword = passwordSetting["Pass"];
+                                    var result = await _userManager.CreateAsync(newUser, newPassword);
+
+                                    if (!result.Succeeded)
+                                        throw new Exception($"Failed to create user '{userName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+
+                                    if (!string.IsNullOrEmpty(role) && await _roleManager.RoleExistsAsync(role))
+                                    {
+                                        var roleEntity = await _roleManager.FindByNameAsync(role);
+                                        if (roleEntity?.GroupRoleId == 2)
+                                        {
+                                            var saleStaff = new SaleStaff
+                                            {
+                                                UserId = newUser.Id,
+                                                ManagerId = manager.ToString() ?? null,
+                                            };
+                                            _appDbContext.SaleStaff.Add(saleStaff);
+                                        }
+
+                                        if (roleEntity?.GroupRoleId == 3)
+                                        {
+                                            var distributor = new Distributor
+                                            {
+                                                UserId = newUser.Id,
+                                                SaleManagementId = reporter.ToString() ?? "chua co quan ly ben phia Sale",
+                                            };
+                                            _appDbContext.Distributor.Add(distributor);
+                                        }
+
+                                        var roleResult = await _userManager.AddToRoleAsync(newUser, role);
+                                        if (!roleResult.Succeeded)
+                                            throw new Exception($"Failed to assign role '{role}' to user '{userName}'");
+                                    }
+
+
+                                    added++;
+                                }
+                                else
+                                {
+                                    existingUser.Email = email;
+                                    existingUser.PhoneNumber = phoneNumber;
+                                    existingUser.Address = address;
+                                    existingUser.AreaId = area;
+                                    existingUser.JoinDate = joinDate;
+                                    existingUser.IsActive = isActive;
+
+                                    var updateResult = await _userManager.UpdateAsync(existingUser);
+                                    if (!updateResult.Succeeded)
+                                        throw new Exception($"Failed to update user '{userName}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+
+                                    updated++;
+                                }
                             }
-
-                            added++;
-                        }
-                        else
-                        {
-                            // Cap nhat nguoi dung hien co
-                            existingUser.Email = email;
-                            existingUser.PhoneNumber = phoneNumber;
-                            existingUser.Address = address;
-                            existingUser.AreaId = area;
-                            existingUser.JoinDate = joinDate;
-                            existingUser.IsActive = isActive;
-
-                            var updateResult = await _userManager.UpdateAsync(existingUser);
-                            if (!updateResult.Succeeded)
-                                throw new Exception($"Failed to update user '{userName}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
-
-                            updated++;
+                            catch (Exception ex)
+                            {
+                                errors++;
+                                errorLogs.Add($"Error processing row {row.RowNumber()}: {ex.Message}");
+                            }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        // Bo qua hang hien tai neu co loi
-                        errors++;
-                        errorLogs.Add($"Error processing row {row.RowNumber()}: {ex.Message}");
-                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    errorLogs.Add($"Transaction failed: {ex.Message}");
                 }
             }
 
             return (added, updated, errors, errorLogs);
         }
+
 
 
         // Ham convert tu csv sang excel
@@ -353,6 +500,8 @@ namespace Unilevel.Services
                 worksheet.Cell(1, 6).Value = "JoinDate";
                 worksheet.Cell(1, 7).Value = "Role";
                 worksheet.Cell(1, 8).Value = "IsActive";
+                //worksheet.Cell(1, 9).Value = "Reporter(Distributor)";
+                //worksheet.Cell(1, 10).Value = "Manager(Sale)";
 
                 var users = await _userManager.Users.ToListAsync();
                 int row = 2;

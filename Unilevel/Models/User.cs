@@ -12,7 +12,6 @@ public class User : IdentityUser
     public DateTime? JoinDate { get; set; }
     public bool? IsActive { get; set; }
     public string? Reporter { get; set; }
-
     public Area? Areas { get; set; }
     
 }

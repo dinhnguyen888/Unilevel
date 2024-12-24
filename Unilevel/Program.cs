@@ -17,7 +17,7 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure DbContext with SQL Server
+// Configure DbContext 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString)

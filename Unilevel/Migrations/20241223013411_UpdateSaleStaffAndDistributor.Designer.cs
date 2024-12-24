@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Unilevel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241223013411_UpdateSaleStaffAndDistributor")]
+    partial class UpdateSaleStaffAndDistributor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -509,104 +511,6 @@ namespace Unilevel.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000001",
-                            ConcurrencyStamp = "763ff492-f6d7-4c91-a294-8e5a67a7c9de",
-                            GroupRoleId = 1,
-                            Name = "Owner",
-                            NormalizedName = "OWNER"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000002",
-                            ConcurrencyStamp = "815353f9-9677-4f10-b818-3d9e141a08bc",
-                            GroupRoleId = 1,
-                            Name = "Administrator",
-                            NormalizedName = "ADMINISTRATOR"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000003",
-                            ConcurrencyStamp = "296bdde9-5062-4da9-8f41-7ffbcc61c73e",
-                            GroupRoleId = 2,
-                            Name = "VPCD",
-                            NormalizedName = "VPCD"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000004",
-                            ConcurrencyStamp = "4107ec94-4dbc-44cd-928f-a4e20785c951",
-                            GroupRoleId = 2,
-                            Name = "BM",
-                            NormalizedName = "BM"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000005",
-                            ConcurrencyStamp = "42b61199-c980-4698-ae26-11637f4da2a6",
-                            GroupRoleId = 2,
-                            Name = "channelActivationHead",
-                            NormalizedName = "CHANNELACTIVATIONHEAD"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000006",
-                            ConcurrencyStamp = "64562983-0309-4204-b177-78e96a171a2b",
-                            GroupRoleId = 2,
-                            Name = "ASM",
-                            NormalizedName = "ASM"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000007",
-                            ConcurrencyStamp = "b68899dc-a6ad-4e19-abb7-f5e36f227e66",
-                            GroupRoleId = 2,
-                            Name = "BAM",
-                            NormalizedName = "BAM"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000008",
-                            ConcurrencyStamp = "f647b4c7-acbf-40e8-bfaa-5b035af78b41",
-                            GroupRoleId = 2,
-                            Name = "CE",
-                            NormalizedName = "CE"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000009",
-                            ConcurrencyStamp = "937ad48e-3ea6-48ad-b14f-13eb5fd0b2e5",
-                            GroupRoleId = 2,
-                            Name = "SaleSUP",
-                            NormalizedName = "SALESUP"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000010",
-                            ConcurrencyStamp = "2bad872f-12ec-4ea6-b153-471b22725ef7",
-                            GroupRoleId = 3,
-                            Name = "distributorOMTL",
-                            NormalizedName = "DISTRIBUTOROMTL"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000011",
-                            ConcurrencyStamp = "af764465-095c-4cd4-8ca0-7bb2b16e49d1",
-                            GroupRoleId = 4,
-                            Name = "otherDepartment",
-                            NormalizedName = "OTHERDEPARTMENT"
-                        },
-                        new
-                        {
-                            Id = "00000000-0000-0000-0000-000000000012",
-                            ConcurrencyStamp = "77905f7c-4d88-46a9-b344-42b8c0190890",
-                            GroupRoleId = 4,
-                            Name = "Guest",
-                            NormalizedName = "GUEST"
-                        });
                 });
 
             modelBuilder.Entity("Unilevel.Models.RolePermission", b =>

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Unilevel.DTOs;
 using Unilevel.Models;
+using static Unilevel.Models.VisitCalendar;
 
 namespace Unilevel.Services
 {
@@ -73,7 +74,7 @@ namespace Unilevel.Services
                 var visitCalendar = new VisitCalendar
                 {
                     CalendarCreatorId = userId,
-                    ImplementationTime = implementationTime,
+                    ImplementationTime = Enum.Parse<Times>(implementationTime),
                     VisitPurpose = visitPurpose,
                     DistributorId = distributorId,
                     Visitors = visitors.Select(v => new Visitor { VisitorId = v.Id }).ToList(),
@@ -180,7 +181,7 @@ namespace Unilevel.Services
                 .Where(vc =>
                     vc.VisitPurpose.Contains(keyword) ||
                     vc.User.UserName.Contains(keyword) ||
-                    vc.Distributor.Id.Contains(keyword))
+                    vc.Distributor.UserId.Contains(keyword))
                 .ToList();
 
             return calendars.Select(vc => new VisitCalendarDTO
@@ -191,7 +192,7 @@ namespace Unilevel.Services
                     .Where(d => d.VisitCalendarId == vc.Id)
                     .Select(d => d.Date)
                     .ToList(),
-                ImplementationTime = vc.ImplementationTime,
+                ImplementationTime = vc.ImplementationTime.ToString(),
                 VisitPurpose = vc.VisitPurpose,
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
@@ -246,7 +247,7 @@ namespace Unilevel.Services
                     .Where(d => d.VisitCalendarId == vc.Id)
                     .Select(d => d.Date)
                     .ToList(),
-                ImplementationTime = vc.ImplementationTime,
+                ImplementationTime = vc.ImplementationTime.ToString(),
                 VisitPurpose = vc.VisitPurpose,
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,
@@ -281,7 +282,7 @@ namespace Unilevel.Services
                     .Where(d => d.VisitCalendarId == vc.Id)
                     .Select(d => d.Date)
                     .ToList(),
-                ImplementationTime = vc.ImplementationTime,
+                ImplementationTime = vc.ImplementationTime.ToString(),
                 VisitPurpose = vc.VisitPurpose,
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 VisitCalendarStatus = vc.VisitCalendarStatus.ToString(),
@@ -315,7 +316,7 @@ namespace Unilevel.Services
                     .Where(d => d.VisitCalendarId == vc.Id)
                     .Select(d => d.Date)
                     .ToList(),
-                ImplementationTime = vc.ImplementationTime,
+                ImplementationTime = vc.ImplementationTime.ToString(),
                 VisitPurpose = vc.VisitPurpose,
                 Visitors = vc.Visitors.Select(v => v.VisitorId).ToList(),
                 DistributorId = vc.DistributorId,

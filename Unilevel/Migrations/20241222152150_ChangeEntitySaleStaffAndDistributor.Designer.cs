@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Unilevel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241222152150_ChangeEntitySaleStaffAndDistributor")]
+    partial class ChangeEntitySaleStaffAndDistributor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -513,96 +515,96 @@ namespace Unilevel.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000001",
-                            ConcurrencyStamp = "763ff492-f6d7-4c91-a294-8e5a67a7c9de",
+                            Id = "b42ed5c8-1d55-4c83-8132-4e847e3afe8b",
+                            ConcurrencyStamp = "94fe590d-2934-42ae-95b8-697bac1df228",
                             GroupRoleId = 1,
                             Name = "Owner",
                             NormalizedName = "OWNER"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000002",
-                            ConcurrencyStamp = "815353f9-9677-4f10-b818-3d9e141a08bc",
+                            Id = "5f9ae651-c7f6-4dba-963b-03bee2b3877a",
+                            ConcurrencyStamp = "89f6e865-c9c7-47d4-871e-9eb7c9b5aa71",
                             GroupRoleId = 1,
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000003",
-                            ConcurrencyStamp = "296bdde9-5062-4da9-8f41-7ffbcc61c73e",
+                            Id = "8f910f9e-3a78-4fe7-96b4-57d0ea50c2ff",
+                            ConcurrencyStamp = "d23c873b-dcf8-4a67-82de-4715a3c1b258",
                             GroupRoleId = 2,
                             Name = "VPCD",
                             NormalizedName = "VPCD"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000004",
-                            ConcurrencyStamp = "4107ec94-4dbc-44cd-928f-a4e20785c951",
+                            Id = "1bcc5a8a-be60-4d3c-8492-37086158160f",
+                            ConcurrencyStamp = "41673641-9f2e-4021-920b-57937018a17c",
                             GroupRoleId = 2,
                             Name = "BM",
                             NormalizedName = "BM"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000005",
-                            ConcurrencyStamp = "42b61199-c980-4698-ae26-11637f4da2a6",
+                            Id = "0c4c1433-a4b2-4a74-9914-4671270b554d",
+                            ConcurrencyStamp = "2ba6d6e7-518a-4503-a32c-9c20b47d2f32",
                             GroupRoleId = 2,
-                            Name = "channelActivationHead",
-                            NormalizedName = "CHANNELACTIVATIONHEAD"
+                            Name = "ChannelActivationHead",
+                            NormalizedName = "CHANNEL ACTIVATION HEAD"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000006",
-                            ConcurrencyStamp = "64562983-0309-4204-b177-78e96a171a2b",
+                            Id = "76d6822d-9716-4ae9-bacd-937a960a869e",
+                            ConcurrencyStamp = "e73602b3-48c7-4314-8718-24dd0e6a44a8",
                             GroupRoleId = 2,
                             Name = "ASM",
                             NormalizedName = "ASM"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000007",
-                            ConcurrencyStamp = "b68899dc-a6ad-4e19-abb7-f5e36f227e66",
+                            Id = "0f829664-8427-4785-b56d-2033a6244ee1",
+                            ConcurrencyStamp = "132e8b1b-2d9b-41ca-8991-5e397585cd92",
                             GroupRoleId = 2,
                             Name = "BAM",
                             NormalizedName = "BAM"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000008",
-                            ConcurrencyStamp = "f647b4c7-acbf-40e8-bfaa-5b035af78b41",
+                            Id = "5ff59d00-1a4c-4eea-98ba-fb83f501aa78",
+                            ConcurrencyStamp = "e031d34a-99d8-4ab6-967a-db897aa6d455",
                             GroupRoleId = 2,
                             Name = "CE",
-                            NormalizedName = "CE"
+                            NormalizedName = "CE – CAPABILITY EXECUTIVE"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000009",
-                            ConcurrencyStamp = "937ad48e-3ea6-48ad-b14f-13eb5fd0b2e5",
+                            Id = "b55e0c63-ad66-45bc-8e2c-8180e5875474",
+                            ConcurrencyStamp = "3e936f91-c528-4b81-b4a7-cf4d22650e7a",
                             GroupRoleId = 2,
                             Name = "SaleSUP",
-                            NormalizedName = "SALESUP"
+                            NormalizedName = "SALE SUP – SALE SUPERVISOR"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000010",
-                            ConcurrencyStamp = "2bad872f-12ec-4ea6-b153-471b22725ef7",
+                            Id = "8696e5ba-357d-4dd3-b966-c1f7c9106633",
+                            ConcurrencyStamp = "8267ffb0-ca8c-4e03-99d5-64bb850a3dfd",
                             GroupRoleId = 3,
                             Name = "distributorOMTL",
                             NormalizedName = "DISTRIBUTOROMTL"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000011",
-                            ConcurrencyStamp = "af764465-095c-4cd4-8ca0-7bb2b16e49d1",
+                            Id = "96b3cce0-089c-489a-85fb-2282c37c4e38",
+                            ConcurrencyStamp = "daeb1ff0-10b3-45ed-9f76-e6ddd3eca6e1",
                             GroupRoleId = 4,
-                            Name = "otherDepartment",
-                            NormalizedName = "OTHERDEPARTMENT"
+                            Name = "OtherDepartment",
+                            NormalizedName = "OTHER DEPARTMENT"
                         },
                         new
                         {
-                            Id = "00000000-0000-0000-0000-000000000012",
-                            ConcurrencyStamp = "77905f7c-4d88-46a9-b344-42b8c0190890",
+                            Id = "4cfa4316-941b-4f88-8853-53334dcb7c51",
+                            ConcurrencyStamp = "4aa92ecc-c307-4575-9abc-c95140f1a511",
                             GroupRoleId = 4,
                             Name = "Guest",
                             NormalizedName = "GUEST"

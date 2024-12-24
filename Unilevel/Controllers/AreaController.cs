@@ -4,7 +4,7 @@ using Unilevel.Models;
 /// Cac chuc nang lien quan den quan ly vung khu vuc
 /// </summary>
 [ApiController]
-[Route("api/for-owner/[controller]")]
+[Route("api/[controller]")]
 public class AreaController : ControllerBase
 {
     private readonly AreaService _areaService;

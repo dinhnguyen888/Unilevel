@@ -23,7 +23,7 @@ public class DistributorsController : ControllerBase
     public async Task<IActionResult> CreateDistributor([FromBody] DistributorDTO dto)
     {
         var distributor = await _service.CreateDistributorAsync(dto);
-        return CreatedAtAction(nameof(GetDistributorById), new { id = distributor.Id }, distributor);
+        return CreatedAtAction(nameof(GetDistributorById), new { id = distributor.UserId }, distributor);
     }
 
     /// <summary>

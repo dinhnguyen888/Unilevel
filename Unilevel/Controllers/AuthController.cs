@@ -30,16 +30,16 @@ public class AuthController : ControllerBase
         return Unauthorized(new { message = "Dang nhap khong thanh cong" });
     }
 
-    /// <summary>
-    /// Dang xuat khoi he thong
-    /// </summary>
-    /// <returns>Ket qua dang xuat</returns>
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
-    {
-        await _authService.LogoutAsync();
-        return Ok(new { message = "Dang xuat thanh cong" });
-    }
+    ///// <summary>
+    ///// Dang xuat khoi he thong
+    ///// </summary>
+    ///// <returns>Ket qua dang xuat</returns>
+    //[HttpPost("logout")]
+    //public async Task<IActionResult> Logout()
+    //{
+    //    await _authService.LogoutAsync();
+    //    return Ok(new { message = "Dang xuat thanh cong" });
+    //}
 
     /// <summary>
     /// Gui yeu cau khoi phuc mat khau

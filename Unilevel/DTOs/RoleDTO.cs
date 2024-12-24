@@ -5,6 +5,7 @@ public class RoleDTO
     public string Id { get; set; }
     public string Name { get; set; }
     public int GroupRoleId { get; set; }
+    public string GroupRoleName { get; set; }
 }
 
 public class CreateRoleDTO

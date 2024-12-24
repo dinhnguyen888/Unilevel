@@ -46,7 +46,7 @@ namespace Unilevel.Services
             {
                 throw new ArgumentNullException("userId cannot be null");
             }
-            var newJob = new JobForVisitation
+            var newJob = new Models.JobForVisitation
             {
                 WorkingPerson = jobDto.WorkingPerson,
                 Reporter = jobDto.Reporter,
@@ -176,7 +176,7 @@ namespace Unilevel.Services
             }
 
             // Chuyen doi tu string sang enum
-            if (Enum.TryParse(jobStatus, out JobForVisitation.JobStatuses status))
+            if (Enum.TryParse(jobStatus, out Models.JobForVisitation.JobStatuses status))
             {
                 job.JobStatus = status; 
             }
@@ -193,7 +193,7 @@ namespace Unilevel.Services
 
 
         // Gui binh luan
-        public async Task SendComment(string userId, CommentForJobDTO commentForJobDTO)
+        public async System.Threading.Tasks.Task SendComment(string userId, CommentForJobDTO commentForJobDTO)
         {
             var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)

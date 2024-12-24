@@ -12,6 +12,7 @@
         public string? AreaId { get; set; }
         public DateTime? JoinDate { get; set; }
         public bool? IsActive { get; set; }
-        public string? Reporter { get; set; }
+        public string? ManagerForSaleStaffId { get; set; }
+        public string? ReporterForDistributorId { get; set; }
     }
 }

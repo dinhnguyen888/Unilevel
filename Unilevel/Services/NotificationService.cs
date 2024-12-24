@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Unilevel.Models;
+using Unilevel.DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using Unilevel.Hubs;
 using System.Security.Claims;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 namespace Unilevel.Services
 {
@@ -66,7 +68,7 @@ namespace Unilevel.Services
 
 
         // Ham tao thong bao gui den user cu the
-        public async Task<Notification> CreateNotificationAsync(string title, string description, List<string> userIds, ClaimsPrincipal user)
+        public async Task<NotificationDto> CreateNotificationAsync(string title, string description, List<string> userIds, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
                          ?? throw new UnauthorizedAccessException("User chua dang nhap");
@@ -77,22 +79,28 @@ namespace Unilevel.Services
             // Gui thong bao qua SignalR
             await SendNotificationToClients(userIds, notification);
 
-            return notification;
+            return new NotificationDto
+            {
+                Title = notification.Title,
+                Description = notification.Description,
+                CreatedBy = notification.UserCreateNotify,
+                Receivers = userIds
+            };
         }
 
 
         // Ham tao thong bao gui den nguoi dung trong cung mot khu vuc
-        public async Task<Notification> SendNotificationToAreaAsync(string title, string description, ClaimsPrincipal user)
+        public async Task<NotificationDto> SendNotificationToAreaAsync(string title, string description, string areaId, ClaimsPrincipal user)
         {
             // Lay AreaId va UserId tu claims
-            var areaId = user.FindFirst("AreaId")?.Value
-                         ?? throw new UnauthorizedAccessException("User khong co AreaId");
+            var localAreaId = areaId
+                         ?? throw new UnauthorizedAccessException("Khong tim thay AreaId");
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
                          ?? throw new UnauthorizedAccessException("User chua dang nhap");
 
             // Lay danh sach nguoi dung trong khu vuc ( tru nguoi thong bao )
             var userIdsInArea = await _context.Users
-                .Where(u => u.AreaId == areaId && u.Id != userId)
+                .Where(u => u.AreaId == localAreaId && u.Id != userId)
                 .Select(u => u.Id)
                 .ToListAsync();
 
@@ -107,19 +115,31 @@ namespace Unilevel.Services
             // Gui thong bao qua SignalR
             await SendNotificationToClients(userIdsInArea, notification);
 
-            return notification;
+            return new NotificationDto
+            {
+                Title = notification.Title,
+                Description = notification.Description,
+                CreatedBy = notification.UserCreateNotify,
+                Receivers = userIdsInArea
+            };
         }
 
 
         // Ham lay thong bao
-        public async Task<List<Notification>> GetNotificationsForUserAsync(ClaimsPrincipal user)
+        public async Task<List<NotificationResponse>> GetNotificationsForUserAsync(ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? throw new UnauthorizedAccessException("User chua dang nhap");
+                       ?? throw new UnauthorizedAccessException("User chưa đăng nhập");
 
             var notifications = await _context.Notification
                 .Include(n => n.NotifyReceiver)
                 .Where(n => n.NotifyReceiver.Any(r => r.UserId == userId))
+                .Select(n => new NotificationResponse
+                {
+                    Id = n.Id,
+                    Title = n.Title,
+                    Description = n.Description
+                })
                 .ToListAsync();
 
             return notifications;

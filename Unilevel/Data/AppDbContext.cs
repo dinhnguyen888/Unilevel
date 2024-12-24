@@ -18,7 +18,7 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
     public DbSet<SaleStaff> SaleStaff { get; set; }
     public DbSet<Distributor> Distributor { get; set; }
     public DbSet<VisitCalendar> VisitCalendar { get; set; }
-    public DbSet<JobForVisitation> JobForVisitation { get; set; }
+    public DbSet<Unilevel.Models.JobForVisitation> JobForVisitation { get; set; }
     public DbSet<Visitor> Visitors { get; set; }
     public DbSet<ImplementationDate> ImplementationDate { get; set; }
     public DbSet<JobDetail> JobDetail { get; set; }
@@ -41,18 +41,31 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
         builder.Entity<SaleDistributor>()
             .ToTable("SaleDistributors");
 
-        builder.Entity<Distributor>()
-            .ToTable("Distributors");
-
-        builder.Entity<SaleStaff>()
-            .ToTable("SaleStaff");
-
         builder.Entity<User>()
             .HasOne(u => u.Areas)
             .WithMany()
-            .HasForeignKey(u => u.AreaId)
-           ;
-      
+            .HasForeignKey(u => u.AreaId);
+
+        builder.Entity<SaleStaff>()
+            .HasKey(d => d.UserId);
+        // Quan hệ 1-1 giữa User và SaleStaff
+
+        builder.Entity<SaleStaff>()
+            .HasOne(s => s.User)
+            .WithOne()
+            .HasForeignKey<SaleStaff>(s => s.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<Distributor>()
+            .HasKey(d => d.UserId);
+
+        // Quan hệ 1-1 giữa User và Distributor
+        builder.Entity<Distributor>()
+            .HasOne(d => d.User)
+            .WithOne()
+            .HasForeignKey<Distributor>(d => d.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
         // Configure UserPermission composite key
         builder.Entity<RolePermission>()
             .HasKey(up => new { up.RoleId, up.PermissionId });
@@ -96,6 +109,10 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
             .HasOne(v => v.Distributor)
             .WithMany()
             .HasForeignKey(v => v.DistributorId);
+
+        builder.Entity<VisitCalendar>()
+            .Property(v => v.ImplementationTime)
+            .HasConversion<string>();
 
         builder.Entity<JobForVisitation>()
             .HasOne(j => j.VisitCalendar)
@@ -143,7 +160,7 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
         .HasForeignKey(i => i.VisitCalendarId)  
         .OnDelete(DeleteBehavior.Cascade);
 
-       builder.Entity<JobForVisitation>()
+       builder.Entity<Unilevel.Models.JobForVisitation>()
         .HasOne(j => j.JobDetail)
         .WithOne()
         .HasForeignKey<JobDetail>(d => d.Id);
@@ -208,18 +225,19 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
 
         // Seeding Role data
         builder.Entity<Role>().HasData(
-            new Role { Id = Guid.NewGuid().ToString(), Name = "Owner", NormalizedName = "OWNER", GroupRoleId = 1 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "Administrator", NormalizedName = "ADMINISTRATOR", GroupRoleId = 1 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "VPCD", NormalizedName = "VPCD", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "BM", NormalizedName = "BM", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "ChannelActivationHead", NormalizedName = "CHANNEL ACTIVATION HEAD", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "ASM", NormalizedName = "ASM", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "BAM", NormalizedName = "BAM", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "CE", NormalizedName = "CE – CAPABILITY EXECUTIVE", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "SaleSUP", NormalizedName = "SALE SUP – SALE SUPERVISOR", GroupRoleId = 2 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "distributorOMTL", NormalizedName = "DISTRIBUTOROMTL", GroupRoleId = 3 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "OtherDepartment", NormalizedName = "OTHER DEPARTMENT", GroupRoleId = 4 },
-            new Role { Id = Guid.NewGuid().ToString(), Name = "Guest", NormalizedName = "GUEST", GroupRoleId = 4 }
-        );
+         new Role { Id = "00000000-0000-0000-0000-000000000001", Name = "Owner", NormalizedName = "OWNER", GroupRoleId = 1 },
+         new Role { Id = "00000000-0000-0000-0000-000000000002", Name = "Administrator", NormalizedName = "ADMINISTRATOR", GroupRoleId = 1 },
+         new Role { Id = "00000000-0000-0000-0000-000000000003", Name = "VPCD", NormalizedName = "VPCD", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000004", Name = "BM", NormalizedName = "BM", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000005", Name = "channelActivationHead", NormalizedName = "CHANNELACTIVATIONHEAD", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000006", Name = "ASM", NormalizedName = "ASM", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000007", Name = "BAM", NormalizedName = "BAM", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000008", Name = "CE", NormalizedName = "CE", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000009", Name = "SaleSUP", NormalizedName = "SALESUP", GroupRoleId = 2 },
+         new Role { Id = "00000000-0000-0000-0000-000000000010", Name = "distributorOMTL", NormalizedName = "DISTRIBUTOROMTL", GroupRoleId = 3 },
+         new Role { Id = "00000000-0000-0000-0000-000000000011", Name = "otherDepartment", NormalizedName = "OTHERDEPARTMENT", GroupRoleId = 4 },
+         new Role { Id = "00000000-0000-0000-0000-000000000012", Name = "Guest", NormalizedName = "GUEST", GroupRoleId = 4 }
+ );
+
     }
 }

@@ -63,6 +63,7 @@ namespace Unilevel.Controllers
                 var notification = await _notificationService.SendNotificationToAreaAsync(
                     request.Title,
                     request.Description,
+                    request.AreaId,
                     User
                 );
                 return Ok(notification);
@@ -74,7 +75,7 @@ namespace Unilevel.Controllers
         }
 
         /// <summary>
-        /// Lay danh sach thong bao cua nguoi dung
+        /// Lay thong bao dua tren nguoi nhan
         /// </summary>
         /// <returns>Danh sach cac thong bao</returns>
         /// <response code="200">Lay thong bao thanh cong</response>

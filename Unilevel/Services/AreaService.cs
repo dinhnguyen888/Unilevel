@@ -94,22 +94,23 @@ public class AreaService
         if (area == null)
             return new List<User>();
 
-        // Lay danh sach Sale va Distributor
-        var saleAndDistributorRoleNames = new[] { "Sale", "Distributor" };
+        // Specify the GroupRoleIds you want to filter
+        var targetGroupRoleIds = new[] { 2, 3 };
 
-        // Truy van
-        var saleStaff = await _context.Users
-            .Where(x => x.AreaId == AreaId)
-            .Where(x => _context.UserRoles
-                .Where(ur => saleAndDistributorRoleNames.Contains(_context.Roles
-                    .Where(r => r.Id == ur.RoleId)
-                    .Select(r => r.Name)
-                    .FirstOrDefault()))
-                .Any(ur => ur.UserId == x.Id)) // Kiem tra nguoi dung co vai tro phu hop
+        // Query to get users in the specified AreaId with the matching GroupRoleIds
+        var users = await _context.Users
+            .Where(user => user.AreaId == AreaId) // Filter by AreaId
+            .Where(user => _context.UserRoles
+                .Where(userRole => _context.Roles
+                    .Where(role => targetGroupRoleIds.Contains(role.GroupRoleId)) // Match GroupRoleId
+                    .Select(role => role.Id)
+                    .Contains(userRole.RoleId)) // Check if RoleId matches
+                .Any(userRole => userRole.UserId == user.Id)) // Ensure the user has the role
             .ToListAsync();
 
-        return saleStaff;
+        return users;
     }
+
 
 
 

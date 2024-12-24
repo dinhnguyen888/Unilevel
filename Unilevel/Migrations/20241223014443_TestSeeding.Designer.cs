@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Unilevel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241223014443_TestSeeding")]
+    partial class TestSeeding
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -514,7 +516,7 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000001",
-                            ConcurrencyStamp = "763ff492-f6d7-4c91-a294-8e5a67a7c9de",
+                            ConcurrencyStamp = "ad155d78-b991-4f00-b181-d7ec00c3e429",
                             GroupRoleId = 1,
                             Name = "Owner",
                             NormalizedName = "OWNER"
@@ -522,7 +524,7 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000002",
-                            ConcurrencyStamp = "815353f9-9677-4f10-b818-3d9e141a08bc",
+                            ConcurrencyStamp = "6b3f6b9c-5f9c-4231-8f86-acc55d5f0e9e",
                             GroupRoleId = 1,
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
@@ -530,7 +532,7 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000003",
-                            ConcurrencyStamp = "296bdde9-5062-4da9-8f41-7ffbcc61c73e",
+                            ConcurrencyStamp = "f094e2b3-7192-4933-b624-132155cbd89d",
                             GroupRoleId = 2,
                             Name = "VPCD",
                             NormalizedName = "VPCD"
@@ -538,7 +540,7 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000004",
-                            ConcurrencyStamp = "4107ec94-4dbc-44cd-928f-a4e20785c951",
+                            ConcurrencyStamp = "97d7432f-e92a-4b8d-a778-1dfa5ebbdd15",
                             GroupRoleId = 2,
                             Name = "BM",
                             NormalizedName = "BM"
@@ -546,15 +548,15 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000005",
-                            ConcurrencyStamp = "42b61199-c980-4698-ae26-11637f4da2a6",
+                            ConcurrencyStamp = "b874cb2f-f839-4e47-8a02-948de596ef18",
                             GroupRoleId = 2,
-                            Name = "channelActivationHead",
-                            NormalizedName = "CHANNELACTIVATIONHEAD"
+                            Name = "ChannelActivationHead",
+                            NormalizedName = "CHANNEL ACTIVATION HEAD"
                         },
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000006",
-                            ConcurrencyStamp = "64562983-0309-4204-b177-78e96a171a2b",
+                            ConcurrencyStamp = "d5b6992b-6b71-499c-a89f-423276bed424",
                             GroupRoleId = 2,
                             Name = "ASM",
                             NormalizedName = "ASM"
@@ -562,7 +564,7 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000007",
-                            ConcurrencyStamp = "b68899dc-a6ad-4e19-abb7-f5e36f227e66",
+                            ConcurrencyStamp = "255a2692-5121-43df-a24a-3652e30be95e",
                             GroupRoleId = 2,
                             Name = "BAM",
                             NormalizedName = "BAM"
@@ -570,23 +572,23 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000008",
-                            ConcurrencyStamp = "f647b4c7-acbf-40e8-bfaa-5b035af78b41",
+                            ConcurrencyStamp = "f3cd8308-4891-4694-97c7-a4b0fced3809",
                             GroupRoleId = 2,
                             Name = "CE",
-                            NormalizedName = "CE"
+                            NormalizedName = "CE – CAPABILITY EXECUTIVE"
                         },
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000009",
-                            ConcurrencyStamp = "937ad48e-3ea6-48ad-b14f-13eb5fd0b2e5",
+                            ConcurrencyStamp = "f9f302f1-08d5-4e5a-af69-53cb97433a14",
                             GroupRoleId = 2,
                             Name = "SaleSUP",
-                            NormalizedName = "SALESUP"
+                            NormalizedName = "SALE SUP – SALE SUPERVISOR"
                         },
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000010",
-                            ConcurrencyStamp = "2bad872f-12ec-4ea6-b153-471b22725ef7",
+                            ConcurrencyStamp = "96b5ff94-8315-4553-9187-209a3679870a",
                             GroupRoleId = 3,
                             Name = "distributorOMTL",
                             NormalizedName = "DISTRIBUTOROMTL"
@@ -594,15 +596,15 @@ namespace Unilevel.Migrations
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000011",
-                            ConcurrencyStamp = "af764465-095c-4cd4-8ca0-7bb2b16e49d1",
+                            ConcurrencyStamp = "30377753-1ffd-4ab0-a3c7-33a8abf37b29",
                             GroupRoleId = 4,
-                            Name = "otherDepartment",
-                            NormalizedName = "OTHERDEPARTMENT"
+                            Name = "OtherDepartment",
+                            NormalizedName = "OTHER DEPARTMENT"
                         },
                         new
                         {
                             Id = "00000000-0000-0000-0000-000000000012",
-                            ConcurrencyStamp = "77905f7c-4d88-46a9-b344-42b8c0190890",
+                            ConcurrencyStamp = "e0eda9fd-ef63-48c7-b9d3-44d5b390b0dc",
                             GroupRoleId = 4,
                             Name = "Guest",
                             NormalizedName = "GUEST"
